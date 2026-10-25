@@ -152,6 +152,8 @@ const roleBadge = document.getElementById('roleBadge');
 const flashWrapper = document.getElementById('flashPlayerWrapper');
 const loadingOverlay = document.getElementById('loadingOverlay');
 const loadingMsg = document.getElementById('loadingMsg');
+const loadingSubMsg = document.getElementById('loadingSubMsg');
+const btnSkipIntro = document.getElementById('btnSkipIntro');
 
 const btnCreateRoom = document.getElementById('btnCreateRoom');
 const hostRoomInfo = document.getElementById('hostRoomInfo');
@@ -212,16 +214,38 @@ async function initRuffleGame() {
 
         loadingOverlay.classList.remove('hidden');
         loadingMsg.innerText = "Đang tải Bleach vs Naruto (Local Engine)...";
+        if (loadingSubMsg) loadingSubMsg.innerText = "Khởi động engine WebAssembly sắc nét 100%";
+        if (btnSkipIntro) btnSkipIntro.classList.add('hidden');
 
         rufflePlayer.load({
             url: "game.swf",
             autoplay: "on"
         }).then(() => {
             console.log("Game Flash đã tải thành công trên máy này!");
-            setTimeout(() => {
+            findRuffleCanvas(rufflePlayer);
+
+            loadingMsg.innerText = "Đang khởi động Bleach vs Naruto...";
+            if (loadingSubMsg) loadingSubMsg.innerText = "Menu game sẽ tự động xuất hiện sau vài giây";
+            if (btnSkipIntro) {
+                btnSkipIntro.classList.remove('hidden');
+            }
+
+            const hideIntroOverlay = () => {
                 loadingOverlay.classList.add('hidden');
-                findRuffleCanvas(rufflePlayer);
-            }, 600);
+                if (ruffleCanvas) {
+                    ruffleCanvas.focus();
+                }
+            };
+
+            if (btnSkipIntro) {
+                btnSkipIntro.onclick = hideIntroOverlay;
+            }
+            loadingOverlay.onclick = (e) => {
+                if (e.target !== btnSkipIntro) hideIntroOverlay();
+            };
+
+            // Tự động ẩn overlay sau 7.5s (khi intro 4399 logo kết thúc và Menu game hiện lên)
+            setTimeout(hideIntroOverlay, 7500);
         }).catch((err) => {
             console.warn("Lỗi tải game.swf:", err);
             loadingMsg.innerHTML = `Chưa tìm thấy file <strong>game.swf</strong>.<br>Vui lòng đặt file game vào cùng thư mục.`;
@@ -267,29 +291,28 @@ function dispatchFlashKeyEvent(type, flashKeyInfo) {
         code: flashKeyInfo.code,
         keyCode: flashKeyInfo.keyCode,
         which: flashKeyInfo.keyCode,
-        bubbles: true,
+        bubbles: false,
         cancelable: true
     });
 
     if (ruffleCanvas) {
         ruffleCanvas.dispatchEvent(event);
-    }
-    if (rufflePlayer) {
+    } else if (rufflePlayer) {
         rufflePlayer.dispatchEvent(event);
     }
-    document.dispatchEvent(event);
-    window.dispatchEvent(event);
 }
 
 // ==========================================
 // 2. INPUT ENGINE & MẠNG P2P
 // ==========================================
 
-// Lắng nghe bàn phím từ người dùng
-window.addEventListener('keydown', (e) => handleUserKeyEvent(e, 'keydown'));
-window.addEventListener('keyup', (e) => handleUserKeyEvent(e, 'keyup'));
+// Lắng nghe bàn phím từ người dùng ở capture phase để chặn xung đột phím
+window.addEventListener('keydown', (e) => handleUserKeyEvent(e, 'keydown'), true);
+window.addEventListener('keyup', (e) => handleUserKeyEvent(e, 'keyup'), true);
 
 function handleUserKeyEvent(e, eventType) {
+    // Chỉ xử lý phím thật từ người dùng, bỏ qua synthetic event tránh đệ quy
+    if (!e.isTrusted) return;
     // Nếu đang trong modal cài đặt phím thì không kích hoạt phím game
     if (activeRecordingButton || !keyModal.classList.contains('hidden')) {
         return;
@@ -306,6 +329,10 @@ function handleUserKeyEvent(e, eventType) {
     if (myRole === 'host') {
         const action = findActionByCode(userKeyBindings.p1, code);
         if (action) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+
             // Dispatch phím P1 vào game nội bộ
             const nativeKey = FLASH_NATIVE_KEYS.p1[action];
             dispatchFlashKeyEvent(eventType, nativeKey);
@@ -325,6 +352,10 @@ function handleUserKeyEvent(e, eventType) {
     else if (myRole === 'guest') {
         const action = findActionByCode(userKeyBindings.p2, code);
         if (action) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+
             // Dịch action sang mã phím P2 chuẩn mà game BVN hiểu
             const nativeKey = FLASH_NATIVE_KEYS.p2[action];
             dispatchFlashKeyEvent(eventType, nativeKey);
@@ -344,10 +375,17 @@ function handleUserKeyEvent(e, eventType) {
     else {
         // Hỗ trợ cả 2 bên nếu chơi 2 người trên cùng 1 máy
         const actionP1 = findActionByCode(userKeyBindings.p1, code);
+        const actionP2 = findActionByCode(userKeyBindings.p2, code);
+
+        if (actionP1 || actionP2) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+        }
+
         if (actionP1) {
             dispatchFlashKeyEvent(eventType, FLASH_NATIVE_KEYS.p1[actionP1]);
         }
-        const actionP2 = findActionByCode(userKeyBindings.p2, code);
         if (actionP2) {
             dispatchFlashKeyEvent(eventType, FLASH_NATIVE_KEYS.p2[actionP2]);
         }

@@ -34,21 +34,34 @@
 
         <!-- Main Screen: Khung hiển thị Game -->
         <main class="game-wrapper">
+            <!-- Toolbar trên game -->
+            <div class="game-toolbar">
+                <div class="toolbar-left">
+                    <span class="role-badge role-solo" id="roleBadge">🎮 Chế độ: Chơi đơn</span>
+                    <span class="netcode-badge">⚡ P2P Local Engine (1080p Siêu Nét)</span>
+                </div>
+                <div class="toolbar-right">
+                    <button id="btnOpenKeyModal" class="btn btn-secondary btn-sm" title="Tùy chỉnh phím bấm cho P1 và P2">
+                        ⚙️ Cài đặt phím
+                    </button>
+                    <button id="btnSyncRestart" class="btn btn-secondary btn-sm" title="Khởi động lại game trên cả 2 máy để đồng bộ">
+                        🔄 Đồng bộ / Bắt đầu lại
+                    </button>
+                    <button id="btnFullscreen" class="btn btn-secondary btn-sm" title="Toàn màn hình">
+                        ⛶ Toàn màn hình
+                    </button>
+                </div>
+            </div>
+
             <div class="game-container" id="gameContainer">
-                <!-- Ruffle Game Canvas (Hiển thị khi chơi Offline hoặc làm Host) -->
+                <!-- Ruffle Game Canvas (Chạy trực tiếp trên cả 2 máy, không dùng video stream) -->
                 <div id="flashPlayerWrapper">
                     <div id="rufflePlayer"></div>
                     <div id="loadingOverlay" class="loading-overlay">
                         <div class="spinner"></div>
-                        <p id="loadingMsg">Đang tải Bleach vs Naruto...</p>
-                        <small>Lần đầu tải file game có thể mất vài giây</small>
+                        <p id="loadingMsg">Đang tải Bleach vs Naruto (Local Engine)...</p>
+                        <small>Game chạy trực tiếp trên máy bạn • Hình ảnh sắc nét 100%</small>
                     </div>
-                </div>
-
-                <!-- Video Stream (Hiển thị cho Khách khi kết nối vào phòng) -->
-                <div id="guestStreamWrapper" class="hidden">
-                    <video id="remoteVideo" autoplay playsinline></video>
-                    <div class="guest-watermark">Đang chơi với tư cách: NGƯỜI CHƠI 2 (P2)</div>
                 </div>
             </div>
 
@@ -97,41 +110,83 @@
                 </div>
             </div>
 
-            <!-- Hướng dẫn điều khiển & Remap phím -->
+            <!-- Hướng dẫn điều khiển hiển thị theo cấu hình hiện tại -->
             <section class="controls-guide">
                 <div class="guide-column">
-                    <h4>🔴 NGƯỜI CHƠI 1 (HOST)</h4>
-                    <div class="keys-grid">
-                        <div><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd><span>Di chuyển</span></div>
-                        <div><kbd>J</kbd><span>Đánh thường</span></div>
-                        <div><kbd>K</kbd><span>Nhảy</span></div>
-                        <div><kbd>L</kbd><span>Lướt / Né</span></div>
-                        <div><kbd>U</kbd><span>Chiêu phụ (Xa)</span></div>
-                        <div><kbd>I</kbd><span>Tuyệt kỹ (Ulti)</span></div>
-                        <div><kbd>O</kbd><span>Gọi hỗ trợ</span></div>
+                    <div class="guide-header">
+                        <h4>🔴 NGƯỜI CHƠI 1 (P1 / HOST)</h4>
+                        <span class="badge-tag">Nhân vật 1</span>
+                    </div>
+                    <div class="keys-grid" id="guideGridP1">
+                        <!-- Render động qua JS -->
                     </div>
                 </div>
                 <div class="guide-column">
-                    <h4>🔵 NGƯỜI CHƠI 2 (KHÁCH / GUEST)</h4>
-                    <div class="keys-grid">
-                        <div><kbd>↑</kbd><kbd>←</kbd><kbd>↓</kbd><kbd>→</kbd><span>Di chuyển</span></div>
-                        <div><kbd>1</kbd> (Numpad)<span>Đánh thường</span></div>
-                        <div><kbd>2</kbd> (Numpad)<span>Nhảy</span></div>
-                        <div><kbd>3</kbd> (Numpad)<span>Lướt / Né</span></div>
-                        <div><kbd>4</kbd> (Numpad)<span>Chiêu phụ</span></div>
-                        <div><kbd>5</kbd> (Numpad)<span>Tuyệt kỹ (Ulti)</span></div>
-                        <div><kbd>6</kbd> (Numpad)<span>Gọi hỗ trợ</span></div>
+                    <div class="guide-header">
+                        <h4>🔵 NGƯỜI CHƠI 2 (P2 / KHÁCH)</h4>
+                        <span class="badge-tag badge-p2">Nhân vật 2</span>
+                    </div>
+                    <div class="keys-grid" id="guideGridP2">
+                        <!-- Render động qua JS -->
                     </div>
                     <div class="numpad-tip">
-                        💡 <em>Nếu laptop không có Numpad, bạn bè vẫn có thể chọn chế độ <strong>Phím Chữ Cho P2</strong> trong tùy chọn!</em>
+                        💡 <em>Bạn đang dùng Laptop không có Numpad? Bấm nút <strong>"⚙️ Cài đặt phím"</strong> bên trên để chọn bộ phím chữ (IJKL + ZXCVBN) cực dễ đánh!</em>
                     </div>
                 </div>
             </section>
         </main>
 
+        <!-- MODAL CÀI ĐẶT BÀN PHÍM (KEYBINDINGS MODAL) -->
+        <div id="keyModal" class="modal-backdrop hidden">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <h3>⚙️ CÀI ĐẶT BÀN PHÍM</h3>
+                    <button id="btnCloseKeyModal" class="btn-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <!-- Chọn Preset nhanh -->
+                    <div class="preset-selector">
+                        <label for="presetSelect"><strong>Gợi ý phím có sẵn:</strong></label>
+                        <select id="presetSelect" class="form-select">
+                            <option value="preset_laptop_letter">⭐ Khuyên dùng cho Laptop: Phím chữ IJKL + ZXCVBN (Không cần Mũi tên & Numpad)</option>
+                            <option value="preset_laptop_num">Laptop có phím mũi tên: Mũi tên + Hàng số 1,2,3,4,5,6</option>
+                            <option value="preset_default_pc">Mặc định PC: Mũi tên + Numpad 1..6</option>
+                            <option value="custom">Tùy biến tự do (Tự chọn từng phím bên dưới)</option>
+                        </select>
+                    </div>
+
+                    <!-- Tabs chọn Người chơi -->
+                    <div class="key-tabs">
+                        <button class="tab-btn active" data-tab="tabP2">🔵 Phím Người Chơi 2 (P2 / Khách)</button>
+                        <button class="tab-btn" data-tab="tabP1">🔴 Phím Người Chơi 1 (P1 / Host)</button>
+                    </div>
+
+                    <!-- Nội dung cài phím P2 -->
+                    <div id="tabP2" class="tab-content active">
+                        <p class="tab-note">Bấm vào ô phím bạn muốn đổi, sau đó nhấn phím mới trên bàn phím:</p>
+                        <div class="binding-list" id="bindingListP2">
+                            <!-- Sinh tự động từ JS -->
+                        </div>
+                    </div>
+
+                    <!-- Nội dung cài phím P1 -->
+                    <div id="tabP1" class="tab-content">
+                        <p class="tab-note">Bấm vào ô phím bạn muốn đổi, sau đó nhấn phím mới trên bàn phím:</p>
+                        <div class="binding-list" id="bindingListP1">
+                            <!-- Sinh tự động từ JS -->
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="btnResetDefaultKeys" class="btn btn-secondary">Khôi phục mặc định</button>
+                    <button id="btnSaveKeys" class="btn btn-primary">✓ Lưu Cài Đặt</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Footer -->
         <footer class="footer">
-            <p>Bleach vs Naruto WebRTC Online Edition • Kết nối P2P Trực Tiếp • Không Lưu Dữ Liệu</p>
+            <p>Bleach vs Naruto P2P Input Sync Edition • 1080p Native • Zero Bandwidth Video • Không Lưu Dữ Liệu</p>
         </footer>
     </div>
 

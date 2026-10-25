@@ -1,40 +1,35 @@
-# Bleach vs Naruto 2.6 - WebRTC Online P2P
+# Bleach vs Naruto 2.6 - WebRTC Online P2P (Input Sync Edition)
 
-Trang web chơi game đối kháng **Bleach vs Naruto 2.6** trực tiếp trên trình duyệt, hỗ trợ chơi Online 2 người qua mạng **WebRTC Peer-to-Peer** (không cần cài thêm phần mềm, độ trễ cực thấp).
+Trang web chơi game đối kháng **Bleach vs Naruto 2.6** trực tiếp trên trình duyệt, hỗ trợ chơi Online 2 người qua mạng **WebRTC Peer-to-Peer** với cơ chế **Đồng bộ phím thời gian thực (P2P Input Sync)**.
 
 ---
 
 ## 🚀 Tính năng nổi bật
 
-- **Chơi ngay không cần cài đặt:** Game chạy trực tiếp trên trình duyệt bằng giả lập **Ruffle Flash (WebAssembly)**.
-- **Tạo phòng & Vào phòng dễ dàng:**
-  - P1 nhấn **"Tạo phòng mới"** $\rightarrow$ Hệ thống cấp mã phòng (ví dụ: `bvn-8821`) và Link mời.
-  - P2 chỉ cần nhập mã hoặc click vào Link mời là tự động kết nối vào trận.
-- **P2P Canvas Stream (Zero Desync):** Game chạy trực tiếp trên máy Host và stream video 60 FPS sang máy Khách, triệt tiêu hoàn toàn lỗi lệch đồng bộ (desync).
+- **Local Engine 1080p Siêu Nét:** Game chạy trực tiếp trên cả 2 máy bằng giả lập **Ruffle Flash (WebAssembly)**, hình ảnh sắc nét 100%, không bị nén mờ video hay giật hình do băng thông.
+- **Tiết kiệm băng thông & Ping cực thấp:** Hai máy chỉ trao đổi tín hiệu phím bấm (chỉ vài byte mỗi giây), độ trễ cực thấp ngay cả khi mạng yếu.
+- **Cài đặt phím tự do (Dành riêng cho Laptop):**
+  - Không cần bàn phím số Numpad!
+  - Cung cấp sẵn preset **Phím Chữ Laptop (IJKL di chuyển + ZXCVBN ra đòn)** cực kỳ thoải mái và dễ bấm combo.
+  - Hỗ trợ đổi phím tùy biến 100% theo ý thích cá nhân.
+- **Nút Đồng bộ & Bắt đầu lại (Sync Restart):** Khởi động lại game trên cả 2 máy cùng lúc chỉ với 1 click để trận đấu luôn đồng bộ.
+- **Tạo phòng & Vào phòng 1 chạm:** Tự động sinh mã phòng và link mời trực tiếp (`?room=bvn-xxxx`).
 - **Hỗ trợ đo Ping thời gian thực:** Hiển thị độ trễ mạng tính bằng `ms`.
-- **Hỗ trợ Laptop không có bàn phím số:** Người chơi 2 có thể dùng cụm phím số thường `1, 2, 3, 4, 5, 6` trên hàng số, hệ thống tự động dịch sang mã `Numpad` của game.
 
 ---
 
-## 🎮 Bảng điều khiển
+## 🎮 Bảng điều khiển mặc định
 
-### Người chơi 1 (Host / P1)
+### Người chơi 1 (P1 / Host)
 - **Di chuyển:** `W`, `A`, `S`, `D`
-- **Đánh thường:** `J`
-- **Nhảy:** `K`
-- **Lướt / Né:** `L`
-- **Chiêu phụ:** `U`
-- **Tuyệt kỹ (Ulti):** `I`
-- **Gọi trợ thủ:** `O`
+- **Đánh thường:** `J` • **Nhảy:** `K` • **Lướt / Né:** `L`
+- **Chiêu phụ:** `U` • **Tuyệt kỹ (Ulti):** `I` • **Gọi trợ thủ:** `O`
 
-### Người chơi 2 (Khách / Guest / P2)
-- **Di chuyển:** `↑`, `←`, `↓`, `→` (Phím mũi tên)
-- **Đánh thường:** `1` (Numpad hoặc Số 1)
-- **Nhảy:** `2` (Numpad hoặc Số 2)
-- **Lướt / Né:** `3` (Numpad hoặc Số 3)
-- **Chiêu phụ:** `4` (Numpad hoặc Số 4)
-- **Tuyệt kỹ (Ulti):** `5` (Numpad hoặc Số 5)
-- **Gọi trợ thủ:** `6` (Numpad hoặc Số 6)
+### Người chơi 2 (P2 / Khách - Preset Laptop khuyên dùng)
+- **Di chuyển:** `I`, `J`, `K`, `L` (Không cần dùng phím mũi tên nhỏ của laptop)
+- **Đánh thường:** `Z` • **Nhảy:** `X` • **Lướt / Né:** `C`
+- **Chiêu phụ:** `V` • **Tuyệt kỹ (Ulti):** `B` • **Gọi trợ thủ:** `N`
+*(Bạn có thể bấm nút **"⚙️ Cài đặt phím"** trên web để đổi sang bất kỳ phím nào khác tùy thích).*
 
 ---
 

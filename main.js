@@ -205,15 +205,17 @@ async function initRuffleGame() {
             letterbox: "on",
             forceScale: true,
             quality: "high",
-            wmode: "direct",
-            autoplay: "on"
+            autoplay: "on",
+            unmuteOverlay: "visible",
+            splashScreen: false
         };
 
         loadingOverlay.classList.remove('hidden');
         loadingMsg.innerText = "Đang tải Bleach vs Naruto (Local Engine)...";
 
         rufflePlayer.load({
-            url: "game.swf"
+            url: "game.swf",
+            autoplay: "on"
         }).then(() => {
             console.log("Game Flash đã tải thành công trên máy này!");
             setTimeout(() => {
@@ -240,7 +242,22 @@ function findRuffleCanvas(player) {
         setTimeout(() => findRuffleCanvas(player), 500);
     } else {
         console.log("Đã tìm thấy Canvas của game:", ruffleCanvas);
+        ruffleCanvas.setAttribute('tabindex', '0');
+        ruffleCanvas.focus();
     }
+}
+
+// Click vào container để focus vào game và kích hoạt AudioContext nếu bị chặn
+const gameContainer = document.getElementById('gameContainer');
+if (gameContainer) {
+    gameContainer.addEventListener('click', () => {
+        if (ruffleCanvas) {
+            ruffleCanvas.focus();
+        }
+        if (rufflePlayer) {
+            rufflePlayer.focus();
+        }
+    });
 }
 
 // Bắn sự kiện phím vào Ruffle Flash Player

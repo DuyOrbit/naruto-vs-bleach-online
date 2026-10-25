@@ -12,8 +12,20 @@
     
     <!-- PeerJS (WebRTC P2P miễn phí) -->
     <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-    <!-- Ruffle (Flash Emulator WebAssembly) -->
-    <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
+    
+    <!-- Cấu hình Ruffle trước khi tải thư viện -->
+    <script>
+        window.RufflePlayer = window.RufflePlayer || {};
+        window.RufflePlayer.config = {
+            autoplay: "on",
+            letterbox: "on",
+            unmuteOverlay: "visible",
+            splashScreen: false,
+            quality: "high"
+        };
+    </script>
+    <!-- Ruffle (Flash Emulator WebAssembly Nightly - Hỗ trợ đầy đủ ActionScript 3 cho Bleach vs Naruto) -->
+    <script src="https://unpkg.com/@ruffle-rs/ruffle@nightly"></script>
 </head>
 <body>
     <div class="app-container">

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bleach vs Naruto Online (P2P)</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Font chữ & Icon -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- PeerJS (WebRTC P2P miễn phí) -->
+    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+    <!-- Ruffle (Flash Emulator WebAssembly) -->
+    <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <span class="bleach-text">BLEACH</span>
+                <span class="vs-text">VS</span>
+                <span class="naruto-text">NARUTO</span>
+                <span class="badge-online">ONLINE P2P</span>
+            </div>
+            <div class="header-status">
+                <span class="status-indicator offline" id="statusDot"></span>
+                <span id="statusText">Chế độ Offline (Chơi đơn)</span>
+                <span class="ping-badge hidden" id="pingBadge">Ping: <strong id="pingVal">--</strong> ms</span>
+            </div>
+        </header>
+
+        <!-- Main Screen: Khung hiển thị Game -->
+        <main class="game-wrapper">
+            <div class="game-container" id="gameContainer">
+                <!-- Ruffle Game Canvas (Hiển thị khi chơi Offline hoặc làm Host) -->
+                <div id="flashPlayerWrapper">
+                    <div id="rufflePlayer"></div>
+                    <div id="loadingOverlay" class="loading-overlay">
+                        <div class="spinner"></div>
+                        <p id="loadingMsg">Đang tải Bleach vs Naruto...</p>
+                        <small>Lần đầu tải file game có thể mất vài giây</small>
+                    </div>
+                </div>
+
+                <!-- Video Stream (Hiển thị cho Khách khi kết nối vào phòng) -->
+                <div id="guestStreamWrapper" class="hidden">
+                    <video id="remoteVideo" autoplay playsinline></video>
+                    <div class="guest-watermark">Đang chơi với tư cách: NGƯỜI CHƠI 2 (P2)</div>
+                </div>
+            </div>
+
+            <!-- Bảng điều khiển Lobby / Phòng đấu -->
+            <div class="lobby-panel">
+                <!-- Tab Tạo phòng (Host) -->
+                <div class="lobby-card host-card">
+                    <div class="card-header">
+                        <h3>🥊 TẠO PHÒNG ĐẤU (BẠN LÀ P1)</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="desc">Tạo phòng để lấy mã hoặc link gửi cho bạn bè cùng chơi.</p>
+                        <button id="btnCreateRoom" class="btn btn-primary">
+                            <span class="icon">➕</span> Tạo phòng mới
+                        </button>
+
+                        <div id="hostRoomInfo" class="room-info hidden">
+                            <label>Mã phòng của bạn:</label>
+                            <div class="copy-box">
+                                <input type="text" id="hostRoomCode" readonly value="" />
+                                <button id="btnCopyCode" class="btn btn-sm">Copy Mã</button>
+                            </div>
+                            <button id="btnCopyLink" class="btn btn-secondary btn-full">
+                                🔗 Copy Link Mời Bạn Bè
+                            </button>
+                            <div class="host-waiting-msg">
+                                <span class="pulse-dot"></span> Đang chờ bạn bè tham gia...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Vào phòng (Khách) -->
+                <div class="lobby-card guest-card">
+                    <div class="card-header">
+                        <h3>⚔️ THAM GIA PHÒNG (BẠN LÀ P2)</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="desc">Nhập mã phòng bạn bè gửi để vào giao hữu ngay.</p>
+                        <div class="input-group">
+                            <input type="text" id="inputRoomCode" placeholder="Ví dụ: bvn-8821" />
+                            <button id="btnJoinRoom" class="btn btn-accent">Vào phòng</button>
+                        </div>
+                        <div id="guestConnectionMsg" class="connection-msg hidden"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hướng dẫn điều khiển & Remap phím -->
+            <section class="controls-guide">
+                <div class="guide-column">
+                    <h4>🔴 NGƯỜI CHƠI 1 (HOST)</h4>
+                    <div class="keys-grid">
+                        <div><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd><span>Di chuyển</span></div>
+                        <div><kbd>J</kbd><span>Đánh thường</span></div>
+                        <div><kbd>K</kbd><span>Nhảy</span></div>
+                        <div><kbd>L</kbd><span>Lướt / Né</span></div>
+                        <div><kbd>U</kbd><span>Chiêu phụ (Xa)</span></div>
+                        <div><kbd>I</kbd><span>Tuyệt kỹ (Ulti)</span></div>
+                        <div><kbd>O</kbd><span>Gọi hỗ trợ</span></div>
+                    </div>
+                </div>
+                <div class="guide-column">
+                    <h4>🔵 NGƯỜI CHƠI 2 (KHÁCH / GUEST)</h4>
+                    <div class="keys-grid">
+                        <div><kbd>↑</kbd><kbd>←</kbd><kbd>↓</kbd><kbd>→</kbd><span>Di chuyển</span></div>
+                        <div><kbd>1</kbd> (Numpad)<span>Đánh thường</span></div>
+                        <div><kbd>2</kbd> (Numpad)<span>Nhảy</span></div>
+                        <div><kbd>3</kbd> (Numpad)<span>Lướt / Né</span></div>
+                        <div><kbd>4</kbd> (Numpad)<span>Chiêu phụ</span></div>
+                        <div><kbd>5</kbd> (Numpad)<span>Tuyệt kỹ (Ulti)</span></div>
+                        <div><kbd>6</kbd> (Numpad)<span>Gọi hỗ trợ</span></div>
+                    </div>
+                    <div class="numpad-tip">
+                        💡 <em>Nếu laptop không có Numpad, bạn bè vẫn có thể chọn chế độ <strong>Phím Chữ Cho P2</strong> trong tùy chọn!</em>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Bleach vs Naruto WebRTC Online Edition • Kết nối P2P Trực Tiếp • Không Lưu Dữ Liệu</p>
+        </footer>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+</html>

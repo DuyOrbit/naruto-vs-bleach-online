@@ -446,6 +446,11 @@ function setupGuestWebRtc() {
     window.addEventListener('click', enableAudio);
     window.addEventListener('keydown', enableAudio);
 
+    if (remoteVideo) {
+        remoteVideo.setAttribute('tabindex', '0');
+        remoteVideo.addEventListener('click', () => remoteVideo.focus());
+    }
+
     peerConnection = new RTCPeerConnection(PEER_CONFIG.config);
 
     peerConnection.ontrack = (event) => {
@@ -453,6 +458,14 @@ function setupGuestWebRtc() {
         if (event.track) {
             guestStream.addTrack(event.track);
         }
+        // Giảm jitter buffer xuống 0 để loại bỏ độ trễ truyền hình ảnh
+        try {
+            peerConnection.getReceivers().forEach(receiver => {
+                if ('playoutDelayHint' in receiver) receiver.playoutDelayHint = 0;
+                if ('jitterBufferDelayHint' in receiver) receiver.jitterBufferDelayHint = 0;
+            });
+        } catch (e) {}
+
         if (remoteVideo && remoteVideo.paused) {
             remoteVideo.play().catch(err => {
                 console.warn("Video play cần cử chỉ tương tác người dùng:", err);
@@ -519,12 +532,29 @@ async function handleWebRtcCandidate(candidate) {
 
 // Tìm action tương ứng với mã phím người dùng ấn
 function findActionByCode(bindingGroup, code) {
-    if (!bindingGroup) return null;
-    for (const [action, config] of Object.entries(bindingGroup)) {
-        if (config.code === code) return action;
-        // Hỗ trợ cả phím số hàng trên Digit1..6 lẫn Numpad1..6 cho tiện lợi
-        if (config.code.startsWith('Digit') && code === config.code.replace('Digit', 'Numpad')) return action;
-        if (config.code.startsWith('Numpad') && code === config.code.replace('Numpad', 'Digit')) return action;
+    if (bindingGroup) {
+        for (const [action, config] of Object.entries(bindingGroup)) {
+            if (config.code === code) return action;
+            // Hỗ trợ cả phím số hàng trên Digit1..6 lẫn Numpad1..6 cho tiện lợi
+            if (config.code.startsWith('Digit') && code === config.code.replace('Digit', 'Numpad')) return action;
+            if (config.code.startsWith('Numpad') && code === config.code.replace('Numpad', 'Digit')) return action;
+        }
+    }
+    // SMART FALLBACK: Hỗ trợ tự động nhận cả WASD lẫn 4 Mũi tên
+    const DEFAULT_FALLBACK_MAP = {
+        KeyW: 'UP', ArrowUp: 'UP',
+        KeyS: 'DOWN', ArrowDown: 'DOWN',
+        KeyA: 'LEFT', ArrowLeft: 'LEFT',
+        KeyD: 'RIGHT', ArrowRight: 'RIGHT',
+        KeyJ: 'ATTACK', Digit1: 'ATTACK', Numpad1: 'ATTACK',
+        KeyK: 'JUMP', Digit2: 'JUMP', Numpad2: 'JUMP',
+        KeyL: 'DASH', Digit3: 'DASH', Numpad3: 'DASH',
+        KeyU: 'SUB', Digit4: 'SUB', Numpad4: 'SUB',
+        KeyI: 'ULTI', Digit5: 'ULTI', Numpad5: 'ULTI',
+        KeyO: 'ASSIST', Digit6: 'ASSIST', Numpad6: 'ASSIST'
+    };
+    if (DEFAULT_FALLBACK_MAP[code]) {
+        return DEFAULT_FALLBACK_MAP[code];
     }
     return null;
 }
@@ -553,7 +583,7 @@ function handleUserKeyEvent(e, eventType) {
             sendNetworkMessage({
                 type: 'game_input',
                 role: 'p2',
-                action: 'ATTACK',
+                action: 'MENU_CONFIRM',
                 eventType: eventType
             });
         } else {
@@ -682,7 +712,11 @@ function handleNetworkMessage(data) {
 
     // 5. Host nhận phím bấm từ Guest (P2)
     if (data.type === 'game_input') {
-        if (myRole === 'host' && data.role === 'p2') {
+        if (myRole === 'host') {
+            if (data.action === 'MENU_CONFIRM') {
+                dispatchFlashKeyEvent(data.eventType, FLASH_NATIVE_KEYS.p1.ATTACK);
+                return;
+            }
             // TỰ ĐỘNG CHUYỂN ACTION THÀNH NATIVE P2 CỦA FLASH BVN
             const nativeKey = FLASH_NATIVE_KEYS.p2[data.action];
             if (nativeKey) {

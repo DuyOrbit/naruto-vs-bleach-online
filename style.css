@@ -195,6 +195,163 @@ body {
     font-weight: 600;
 }
 
+.netcode-badge-fixed {
+    font-size: 0.82rem;
+    font-family: var(--font-heading);
+    color: var(--success-green);
+    background: rgba(0, 255, 136, 0.1);
+    border: 1px solid rgba(0, 255, 136, 0.4);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: 700;
+    box-shadow: 0 0 10px rgba(0, 255, 136, 0.15);
+    letter-spacing: 0.5px;
+}
+
+/* Banner Hướng dẫn chọn chế độ đấu 2 người */
+.match-mode-alert {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: linear-gradient(90deg, rgba(255, 119, 0, 0.15), rgba(0, 210, 255, 0.12));
+    border: 1px solid rgba(255, 170, 0, 0.5);
+    border-radius: 8px;
+    padding: 8px 14px;
+    box-shadow: 0 0 15px rgba(255, 119, 0, 0.2);
+    animation: alertPulse 3s infinite ease-in-out;
+}
+
+@keyframes alertPulse {
+    0%, 100% { border-color: rgba(255, 170, 0, 0.4); box-shadow: 0 0 10px rgba(255, 119, 0, 0.2); }
+    50% { border-color: rgba(0, 210, 255, 0.6); box-shadow: 0 0 16px rgba(0, 210, 255, 0.3); }
+}
+
+.match-mode-alert .alert-icon {
+    font-size: 1.4rem;
+    line-height: 1;
+}
+
+.match-mode-alert .alert-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 0.88rem;
+    line-height: 1.4;
+}
+
+.match-mode-alert .alert-title {
+    font-family: var(--font-heading);
+    font-weight: 800;
+    color: #ffbb00;
+    letter-spacing: 0.5px;
+}
+
+.match-mode-alert .alert-desc {
+    color: #e0e6ed;
+}
+
+.match-mode-alert .badge-highlight {
+    background: rgba(255, 170, 0, 0.25);
+    color: #fff;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 170, 0, 0.6);
+}
+
+/* Real-time Input HUD */
+.input-hud {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    background: rgba(15, 20, 32, 0.95);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 8px 14px;
+    flex-wrap: wrap;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.hud-player {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.hud-label {
+    font-family: var(--font-heading);
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--naruto-orange);
+    letter-spacing: 0.5px;
+}
+
+.hud-label-p2 {
+    color: var(--bleach-blue);
+}
+
+.hud-group {
+    display: flex;
+    gap: 4px;
+}
+
+.hud-divider {
+    width: 1px;
+    height: 18px;
+    background: rgba(255, 255, 255, 0.15);
+    margin: 0 2px;
+}
+
+.hud-key {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 4px;
+    font-family: var(--font-heading);
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+    color: var(--text-muted);
+    transition: all 0.08s ease;
+    user-select: none;
+}
+
+.hud-p1 .hud-key.active {
+    background: #ffaa00;
+    border-color: #ffcc00;
+    color: #000;
+    font-weight: 900;
+    box-shadow: 0 0 10px #ffaa00, 0 0 15px rgba(255, 170, 0, 0.6);
+    transform: scale(1.15);
+}
+
+.hud-p2 .hud-key.active {
+    background: #00e5ff;
+    border-color: #00ffff;
+    color: #000;
+    font-weight: 900;
+    box-shadow: 0 0 10px #00e5ff, 0 0 15px rgba(0, 229, 255, 0.6);
+    transform: scale(1.15);
+}
+
+.btn-sync-restart {
+    background: linear-gradient(135deg, rgba(255, 119, 0, 0.15), rgba(255, 170, 0, 0.25));
+    border: 1px solid var(--naruto-orange);
+    color: #ffaa00;
+    transition: all 0.2s ease;
+}
+
+.btn-sync-restart:hover {
+    background: linear-gradient(135deg, rgba(255, 119, 0, 0.35), rgba(255, 170, 0, 0.45));
+    color: #fff;
+    box-shadow: 0 0 12px rgba(255, 119, 0, 0.4);
+}
+
 .game-container {
     position: relative;
     width: 100%;
@@ -895,6 +1052,19 @@ kbd {
     color: var(--text-muted);
     font-size: 0.85rem;
     margin-top: auto;
+}
+
+.btn-screen-share {
+    background: linear-gradient(135deg, #00d2ff, #0066ff);
+    color: #fff;
+    font-weight: 700;
+    border: 1px solid rgba(0, 210, 255, 0.6);
+    box-shadow: 0 0 10px rgba(0, 210, 255, 0.35);
+    animation: btnShareGlow 2.5s infinite alternate ease-in-out;
+}
+@keyframes btnShareGlow {
+    from { box-shadow: 0 0 6px rgba(0, 210, 255, 0.3); }
+    to { box-shadow: 0 0 16px rgba(0, 210, 255, 0.7); }
 }
 
 .hidden {

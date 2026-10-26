@@ -75,10 +75,23 @@ const FLASH_NATIVE_KEYS = {
 };
 
 // ==========================================
-// 2. CÁC OPTION ĐIỀU KHIỂN CHO NGƯỜI DÙNG (3 OPTIONS)
+// 2. CÁC OPTION ĐIỀU KHIỂN CHO NGƯỜI DÙNG
 // ==========================================
 const KEY_PRESETS = {
-    // Option 1: Bộ phím WASD
+    // Option 1: Bộ phím 4 Mũi tên & Numpad (↑ ↓ ← → di chuyển + Numpad 1..6 ra đòn, hỗ trợ phím số 1..6)
+    option_arrows: {
+        UP:     { code: 'ArrowUp', display: '↑' },
+        DOWN:   { code: 'ArrowDown', display: '↓' },
+        LEFT:   { code: 'ArrowLeft', display: '←' },
+        RIGHT:  { code: 'ArrowRight', display: '→' },
+        ATTACK: { code: 'Numpad1', display: 'Num 1' },
+        JUMP:   { code: 'Numpad2', display: 'Num 2' },
+        DASH:   { code: 'Numpad3', display: 'Num 3' },
+        SUB:    { code: 'Numpad4', display: 'Num 4' },
+        ULTI:   { code: 'Numpad5', display: 'Num 5' },
+        ASSIST: { code: 'Numpad6', display: 'Num 6' }
+    },
+    // Option 2: Bộ phím WASD (W A S D + J K L U I O)
     option_wasd: {
         UP:     { code: 'KeyW', display: 'W' },
         DOWN:   { code: 'KeyS', display: 'S' },
@@ -91,18 +104,18 @@ const KEY_PRESETS = {
         ULTI:   { code: 'KeyI', display: 'I' },
         ASSIST: { code: 'KeyO', display: 'O' }
     },
-    // Option 2: Bộ phím 4 Mũi tên (Hỗ trợ cả phím số hàng trên 1..6 và Numpad 1..6)
-    option_arrows: {
-        UP:     { code: 'ArrowUp', display: '↑' },
-        DOWN:   { code: 'ArrowDown', display: '↓' },
-        LEFT:   { code: 'ArrowLeft', display: '←' },
-        RIGHT:  { code: 'ArrowRight', display: '→' },
-        ATTACK: { code: 'Digit1', display: '1 / Num 1' },
-        JUMP:   { code: 'Digit2', display: '2 / Num 2' },
-        DASH:   { code: 'Digit3', display: '3 / Num 3' },
-        SUB:    { code: 'Digit4', display: '4 / Num 4' },
-        ULTI:   { code: 'Digit5', display: '5 / Num 5' },
-        ASSIST: { code: 'Digit6', display: '6 / Num 6' }
+    // Option 3: Bộ phím Laptop (IJKL di chuyển + ZXCVBN ra đòn)
+    option_laptop: {
+        UP:     { code: 'KeyI', display: 'I' },
+        DOWN:   { code: 'KeyK', display: 'K' },
+        LEFT:   { code: 'KeyJ', display: 'J' },
+        RIGHT:  { code: 'KeyL', display: 'L' },
+        ATTACK: { code: 'KeyZ', display: 'Z' },
+        JUMP:   { code: 'KeyX', display: 'X' },
+        DASH:   { code: 'KeyC', display: 'C' },
+        SUB:    { code: 'KeyV', display: 'V' },
+        ULTI:   { code: 'KeyB', display: 'B' },
+        ASSIST: { code: 'KeyN', display: 'N' }
     }
 };
 
@@ -110,7 +123,7 @@ const KEY_PRESETS = {
 let userKeyBindings = loadKeyBindings();
 
 function loadKeyBindings() {
-    const saved = localStorage.getItem('bvn_user_keybindings_v2');
+    const saved = localStorage.getItem('bvn_user_keybindings_v4');
     if (saved) {
         try {
             return JSON.parse(saved);
@@ -118,7 +131,7 @@ function loadKeyBindings() {
             console.error("Lỗi parse saved bindings:", e);
         }
     }
-    // Mặc định ban đầu: P1 dùng Option WASD, P2 dùng Option 4 Mũi tên
+    // Mặc định chuẩn xác: P1 dùng WASD, P2 dùng 4 Mũi tên + Numpad 1..6 (với số 1..6 là fallback)
     return {
         p1Preset: 'option_wasd',
         p2Preset: 'option_arrows',
@@ -129,8 +142,36 @@ function loadKeyBindings() {
 
 function saveKeyBindings(bindings) {
     userKeyBindings = bindings;
-    localStorage.setItem('bvn_user_keybindings_v2', JSON.stringify(bindings));
+    localStorage.setItem('bvn_user_keybindings_v4', JSON.stringify(bindings));
     renderGuides();
+    syncHudKeyLabels();
+}
+
+// Cập nhật đèn báo phím trên màn hình (Real-time Input HUD)
+function updateInputHud(role, action, isActive) {
+    const keyEl = document.getElementById(`hud_${role}_${action}`);
+    if (keyEl) {
+        if (isActive) {
+            keyEl.classList.add('active');
+        } else {
+            keyEl.classList.remove('active');
+        }
+    }
+}
+
+// Đồng bộ nhãn phím hiển thị trên HUD
+function syncHudKeyLabels() {
+    ['p1', 'p2'].forEach(group => {
+        const bindings = userKeyBindings[group];
+        if (bindings) {
+            for (const [action, conf] of Object.entries(bindings)) {
+                const el = document.getElementById(`hud_${group}_${action}`);
+                if (el && conf.display) {
+                    el.innerText = conf.display.split(' ')[0];
+                }
+            }
+        }
+    });
 }
 
 // ==========================================
@@ -139,6 +180,7 @@ function saveKeyBindings(bindings) {
 let socket = null;
 let peerConnection = null;
 let myRole = 'solo'; // 'solo' | 'host' | 'guest'
+let currentNetcodeMode = 'stream'; // Khóa cố định Remote Play: 1 game duy nhất, 100% không lệch trận
 let rufflePlayer = null;
 let ruffleCanvas = null;
 let pingInterval = null;
@@ -170,6 +212,7 @@ const guestConnectionMsg = document.getElementById('guestConnectionMsg');
 
 const btnSyncRestart = document.getElementById('btnSyncRestart');
 const btnFullscreen = document.getElementById('btnFullscreen');
+const btnShareScreen = document.getElementById('btnShareScreen');
 const btnOpenKeyModal = document.getElementById('btnOpenKeyModal');
 
 // Modal Elements
@@ -194,12 +237,28 @@ function focusGame() {
     if (rufflePlayer) {
         rufflePlayer.focus();
         if (rufflePlayer.shadowRoot) {
-            const inner = rufflePlayer.shadowRoot.querySelector('#container') || rufflePlayer.shadowRoot.querySelector('canvas');
+            const container = rufflePlayer.shadowRoot.getElementById('container') || rufflePlayer.shadowRoot.querySelector('#container');
+            if (container) {
+                container.focus();
+                container.dispatchEvent(new Event('focusin', { bubbles: true }));
+                container.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, composed: true }));
+            }
+            const inner = rufflePlayer.shadowRoot.querySelector('canvas');
             if (inner) inner.focus();
         }
     }
     if (ruffleCanvas) {
         ruffleCanvas.focus();
+    }
+}
+
+function pauseLocalRuffle() {
+    try {
+        if (rufflePlayer && typeof rufflePlayer.pause === 'function') {
+            rufflePlayer.pause();
+        }
+    } catch (e) {
+        console.warn("Không thể pause local ruffle:", e);
     }
 }
 
@@ -228,7 +287,8 @@ async function initRuffleGame() {
             quality: "high",
             autoplay: "on",
             unmuteOverlay: "hidden",
-            splashScreen: false
+            splashScreen: false,
+            backgroundExecutionMode: "mainThread"
         };
 
         loadingOverlay.classList.remove('hidden');
@@ -288,39 +348,58 @@ if (gameContainer) {
 function dispatchFlashKeyEvent(type, flashKeyInfo) {
     if (!flashKeyInfo) return;
 
+    focusGame();
+
+    const isNumpad = flashKeyInfo.code && flashKeyInfo.code.startsWith('Numpad');
+    const locationVal = isNumpad ? 3 : 0;
+
     const eventInit = {
         key: flashKeyInfo.key,
         code: flashKeyInfo.code,
         keyCode: flashKeyInfo.keyCode,
         which: flashKeyInfo.keyCode,
+        location: locationVal,
         bubbles: true,
         cancelable: true,
         composed: true
     };
 
-    focusGame();
-
-    if (ruffleCanvas) {
-        ruffleCanvas.dispatchEvent(new KeyboardEvent(type, eventInit));
+    let ev;
+    try {
+        ev = new KeyboardEvent(type, eventInit);
+        Object.defineProperty(ev, 'keyCode', { value: flashKeyInfo.keyCode, writable: false });
+        Object.defineProperty(ev, 'which', { value: flashKeyInfo.keyCode, writable: false });
+        Object.defineProperty(ev, 'location', { value: locationVal, writable: false });
+    } catch (e) {
+        ev = new KeyboardEvent(type, eventInit);
     }
+
     if (rufflePlayer && rufflePlayer.shadowRoot) {
-        const shadowContainer = rufflePlayer.shadowRoot.querySelector('#container');
+        const shadowContainer = rufflePlayer.shadowRoot.getElementById('container') || rufflePlayer.shadowRoot.querySelector('#container');
         if (shadowContainer) {
-            shadowContainer.dispatchEvent(new KeyboardEvent(type, eventInit));
+            shadowContainer.dispatchEvent(ev);
+        }
+        const shadowCanvas = rufflePlayer.shadowRoot.querySelector('canvas');
+        if (shadowCanvas && shadowCanvas !== ruffleCanvas) {
+            shadowCanvas.dispatchEvent(ev);
         }
     }
-    if (rufflePlayer) {
-        rufflePlayer.dispatchEvent(new KeyboardEvent(type, eventInit));
+    if (ruffleCanvas) {
+        ruffleCanvas.dispatchEvent(ev);
     }
-    window.dispatchEvent(new KeyboardEvent(type, eventInit));
+    if (rufflePlayer) {
+        rufflePlayer.dispatchEvent(ev);
+    }
+    window.dispatchEvent(ev);
+    document.dispatchEvent(ev);
 }
 
 // ==========================================
 // 5. WEBRTC 60FPS HD CANVAS STREAMING ENGINE
 // ==========================================
 
-// Tăng bitrate SDP lên 15 Mbps cho chất lượng 1080p 60fps không mờ
-function boostSdpBitrate(sdp, maxKbps = 15000) {
+// Tăng bitrate SDP lên 20 Mbps cho chất lượng 1080p 60fps nét căng
+function boostSdpBitrate(sdp, maxKbps = 20000) {
     let lines = sdp.split('\r\n');
     let mVideoIndex = lines.findIndex(l => l.startsWith('m=video'));
     if (mVideoIndex !== -1) {
@@ -338,6 +417,11 @@ async function setupHostWebRtc() {
     }
 
     peerConnection = new RTCPeerConnection(PEER_CONFIG.config);
+    pendingIceCandidates = [];
+
+    // Kênh dữ liệu P2P trực tiếp cho phím bấm (không vòng qua server WebSocket)
+    setupInputChannel(peerConnection.createDataChannel('bvn-input', { ordered: true }));
+    let videoSender = null;
 
     // Chờ canvas sẵn sàng
     if (!ruffleCanvas) {
@@ -356,7 +440,8 @@ async function setupHostWebRtc() {
             const videoTrack = canvasStream.getVideoTracks()[0];
             if (videoTrack) {
                 if ('contentHint' in videoTrack) {
-                    videoTrack.contentHint = 'detail'; // Giữ nét từng pixel và text
+                    // 'detail': Tối ưu giữ nét tối đa cho chữ và đường viền nhân vật 2D, không bị nén mờ
+                    videoTrack.contentHint = 'detail';
                 }
             }
 
@@ -372,7 +457,8 @@ async function setupHostWebRtc() {
             }
 
             outgoingStream.getTracks().forEach(track => {
-                peerConnection.addTrack(track, outgoingStream);
+                const sender = peerConnection.addTrack(track, outgoingStream);
+                if (track.kind === 'video') videoSender = sender;
                 console.log(`Host: Đã thêm ${track.kind} Track 60FPS vào WebRTC.`);
             });
         } catch (e) {
@@ -394,21 +480,92 @@ async function setupHostWebRtc() {
     peerConnection.onconnectionstatechange = () => {
         console.log("Host PeerConnection state:", peerConnection.connectionState);
         if (peerConnection.connectionState === 'connected') {
-            showSyncNotification("🟢 Đã truyền hình ảnh 60FPS HD và Âm thanh cho Khách!");
+            showSyncNotification("🟢 Đã truyền hình ảnh 60FPS HD Siêu Nét và Âm thanh cho Khách!");
         }
     };
 
     // Tạo Offer
     try {
         const offer = await peerConnection.createOffer();
-        const boostedSdp = boostSdpBitrate(offer.sdp, 15000);
+        const boostedSdp = boostSdpBitrate(offer.sdp, 20000);
         await peerConnection.setLocalDescription({ type: 'offer', sdp: boostedSdp });
         sendNetworkMessage({
             type: 'webrtc_offer',
             sdp: boostedSdp
         });
+        if (videoSender) await tuneVideoSenderForLowLatency(videoSender);
     } catch (e) {
         console.error("Host: Lỗi tạo WebRTC offer:", e);
+    }
+}
+
+// Cấu hình bộ mã hóa video: GIỮ NGUYÊN 100% ĐỘ PHÂN GIẢI NATIVE (không bao giờ downscale),
+// luôn giữ 60 FPS và Bitrate 20Mbps cho hình ảnh nét căng
+async function tuneVideoSenderForLowLatency(sender) {
+    try {
+        const params = sender.getParameters();
+        if (!params.encodings || params.encodings.length === 0) params.encodings = [{}];
+        // Không hạ độ phân giải (scale = 1.0)
+        params.encodings[0].scaleResolutionDownBy = 1.0;
+        params.encodings[0].maxFramerate = 60;
+        params.encodings[0].maxBitrate = 20000000; // 20 Mbps cho đồ họa 1080p sắc nét 100%
+        params.encodings[0].priority = 'high';
+        params.encodings[0].networkPriority = 'high';
+        params.degradationPreference = 'maintain-resolution'; // Giữ nguyên độ sắc nét
+        await sender.setParameters(params);
+        console.log(`Host: Encoder 60FPS HD: giữ nguyên 100% resolution, 20Mbps bitrate`);
+    } catch (e) {
+        console.warn("Không thể tinh chỉnh encoder:", e);
+    }
+}
+
+// ==========================================
+// KÊNH P2P TRỰC TIẾP CHO PHÍM BẤM (WebRTC DataChannel)
+// ==========================================
+let inputChannel = null;
+
+function setupInputChannel(channel) {
+    inputChannel = channel;
+    channel.onopen = () => {
+        console.log("DataChannel P2P đã mở: phím bấm đi trực tiếp giữa 2 máy.");
+    };
+    channel.onclose = () => {
+        if (inputChannel === channel) inputChannel = null;
+    };
+    channel.onmessage = (ev) => {
+        try {
+            handleNetworkMessage(JSON.parse(ev.data));
+        } catch (e) {
+            console.error("Lỗi parse DataChannel msg:", e);
+        }
+    };
+}
+
+// Gửi tin nhắn cần độ trễ thấp (phím, ping): ưu tiên DataChannel P2P, dự phòng WebSocket
+function sendFastMessage(data) {
+    if (inputChannel && inputChannel.readyState === 'open') {
+        inputChannel.send(JSON.stringify(data));
+        return true;
+    }
+    return sendNetworkMessage(data);
+}
+
+// Tạm dừng / chạy lại Flash cục bộ (Khách ở Remote Play không cần chạy game riêng)
+function setLocalRufflePaused(paused) {
+    if (!rufflePlayer) return;
+    try {
+        const api = typeof rufflePlayer.ruffle === 'function' ? rufflePlayer.ruffle(1) : rufflePlayer;
+        if (paused) {
+            if (typeof api.suspend === 'function') api.suspend();
+            else if (typeof api.pause === 'function') api.pause();
+        } else if (typeof api.resume === 'function') {
+            api.resume();
+        } else if (typeof api.play === 'function') {
+            api.play();
+        }
+        if ('volume' in api) api.volume = paused ? 0 : 1;
+    } catch (e) {
+        console.warn("Không thể pause/resume Ruffle:", e);
     }
 }
 
@@ -420,9 +577,10 @@ function setupGuestWebRtc() {
         peerConnection = null;
     }
 
-    // Ẩn player Flash local của Guest để tiết kiệm 100% tài nguyên CPU
+    // Ẩn và TẠM DỪNG player Flash local của Guest để dành CPU/GPU cho giải mã video (giảm trễ)
     const rPlayer = document.getElementById('rufflePlayer');
     if (rPlayer) rPlayer.style.display = 'none';
+    pauseLocalRuffle();
 
     if (remoteVideo) {
         remoteVideo.classList.remove('hidden');
@@ -453,6 +611,11 @@ function setupGuestWebRtc() {
 
     peerConnection = new RTCPeerConnection(PEER_CONFIG.config);
 
+    // Nhận kênh P2P phím bấm do Host tạo
+    peerConnection.ondatachannel = (event) => {
+        setupInputChannel(event.channel);
+    };
+
     peerConnection.ontrack = (event) => {
         console.log("Guest: Nhận media track:", event.track.kind);
         if (event.track) {
@@ -463,6 +626,7 @@ function setupGuestWebRtc() {
             peerConnection.getReceivers().forEach(receiver => {
                 if ('playoutDelayHint' in receiver) receiver.playoutDelayHint = 0;
                 if ('jitterBufferDelayHint' in receiver) receiver.jitterBufferDelayHint = 0;
+                if ('jitterBufferTarget' in receiver) receiver.jitterBufferTarget = 0;
             });
         } catch (e) {}
 
@@ -491,13 +655,15 @@ function setupGuestWebRtc() {
 }
 
 async function handleWebRtcOffer(sdp) {
-    if (!peerConnection) {
-        setupGuestWebRtc();
-    }
+    // Mỗi offer từ Host là một phiên mới (Host tạo lại PeerConnection khi khởi động lại game)
+    // => Guest cũng tạo PeerConnection mới để không bị kẹt phiên cũ
+    setupGuestWebRtc();
+    pendingIceCandidates = [];
     try {
         await peerConnection.setRemoteDescription(new RTCSessionDescription({ type: 'offer', sdp }));
+        await flushPendingIceCandidates();
         const answer = await peerConnection.createAnswer();
-        const boostedSdp = boostSdpBitrate(answer.sdp, 15000);
+        const boostedSdp = boostSdpBitrate(answer.sdp, 20000);
         await peerConnection.setLocalDescription({ type: 'answer', sdp: boostedSdp });
         sendNetworkMessage({
             type: 'webrtc_answer',
@@ -512,13 +678,33 @@ async function handleWebRtcAnswer(sdp) {
     if (!peerConnection) return;
     try {
         await peerConnection.setRemoteDescription(new RTCSessionDescription({ type: 'answer', sdp }));
+        await flushPendingIceCandidates();
     } catch (e) {
         console.error("Host: Lỗi xử lý WebRTC answer:", e);
     }
 }
 
+// ICE candidate đến trước khi có remoteDescription sẽ được xếp hàng, tránh mất kết nối
+let pendingIceCandidates = [];
+
+async function flushPendingIceCandidates() {
+    const queued = pendingIceCandidates;
+    pendingIceCandidates = [];
+    for (const c of queued) {
+        try {
+            await peerConnection.addIceCandidate(new RTCIceCandidate(c));
+        } catch (e) {
+            console.warn("Lỗi addIceCandidate (queued):", e);
+        }
+    }
+}
+
 async function handleWebRtcCandidate(candidate) {
     if (!peerConnection) return;
+    if (!peerConnection.remoteDescription) {
+        pendingIceCandidates.push(candidate);
+        return;
+    }
     try {
         await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
     } catch (e) {
@@ -532,29 +718,12 @@ async function handleWebRtcCandidate(candidate) {
 
 // Tìm action tương ứng với mã phím người dùng ấn
 function findActionByCode(bindingGroup, code) {
-    if (bindingGroup) {
-        for (const [action, config] of Object.entries(bindingGroup)) {
-            if (config.code === code) return action;
-            // Hỗ trợ cả phím số hàng trên Digit1..6 lẫn Numpad1..6 cho tiện lợi
-            if (config.code.startsWith('Digit') && code === config.code.replace('Digit', 'Numpad')) return action;
-            if (config.code.startsWith('Numpad') && code === config.code.replace('Numpad', 'Digit')) return action;
-        }
-    }
-    // SMART FALLBACK: Hỗ trợ tự động nhận cả WASD lẫn 4 Mũi tên
-    const DEFAULT_FALLBACK_MAP = {
-        KeyW: 'UP', ArrowUp: 'UP',
-        KeyS: 'DOWN', ArrowDown: 'DOWN',
-        KeyA: 'LEFT', ArrowLeft: 'LEFT',
-        KeyD: 'RIGHT', ArrowRight: 'RIGHT',
-        KeyJ: 'ATTACK', Digit1: 'ATTACK', Numpad1: 'ATTACK',
-        KeyK: 'JUMP', Digit2: 'JUMP', Numpad2: 'JUMP',
-        KeyL: 'DASH', Digit3: 'DASH', Numpad3: 'DASH',
-        KeyU: 'SUB', Digit4: 'SUB', Numpad4: 'SUB',
-        KeyI: 'ULTI', Digit5: 'ULTI', Numpad5: 'ULTI',
-        KeyO: 'ASSIST', Digit6: 'ASSIST', Numpad6: 'ASSIST'
-    };
-    if (DEFAULT_FALLBACK_MAP[code]) {
-        return DEFAULT_FALLBACK_MAP[code];
+    if (!bindingGroup) return null;
+    for (const [action, config] of Object.entries(bindingGroup)) {
+        if (config.code === code) return action;
+        // Hỗ trợ cả phím số hàng trên Digit1..6 lẫn Numpad1..6 cho tiện lợi
+        if (config.code.startsWith('Digit') && code === config.code.replace('Digit', 'Numpad')) return action;
+        if (config.code.startsWith('Numpad') && code === config.code.replace('Numpad', 'Digit')) return action;
     }
     return null;
 }
@@ -571,66 +740,131 @@ function handleUserKeyEvent(e, eventType) {
     if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) return;
 
     const code = e.code;
+    const isKeyDown = (eventType === 'keydown');
+
+    // Khách bấm phím bất kỳ => bật tiếng stream (trình duyệt yêu cầu tương tác người dùng)
+    if (myRole === 'guest' && remoteVideo && remoteVideo.muted && remoteVideo.srcObject) {
+        remoteVideo.muted = false;
+    }
 
     // Chặn cuộn màn hình trình duyệt với phím mũi tên & Space
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(code)) {
         e.preventDefault();
     }
 
-    // Phím Enter hoặc Space hỗ trợ xác nhận/chọn menu nhanh
+    // Chặn phím thật đi tiếp vào Flash: Flash chỉ nhận phím đã được code chuyển đổi.
+    const swallow = () => {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+    };
+
+    // Phím Enter hoặc Space hỗ trợ chọn nhanh trên mọi Menu
     if (code === 'Enter' || code === 'Space') {
+        swallow();
+        if (e.repeat) return;
+        const rawKey = (code === 'Enter') 
+            ? { code: 'Enter', key: 'Enter', keyCode: 13, which: 13 }
+            : { code: 'Space', key: ' ', keyCode: 32, which: 32 };
+
         if (myRole === 'guest') {
-            sendNetworkMessage({
+            updateInputHud('p2', 'ATTACK', isKeyDown);
+            sendFastMessage({
                 type: 'game_input',
                 role: 'p2',
-                action: 'MENU_CONFIRM',
+                action: 'ATTACK',
+                eventType: eventType
+            });
+            sendFastMessage({
+                type: 'raw_flash_key',
+                keyInfo: rawKey,
                 eventType: eventType
             });
         } else {
+            updateInputHud('p1', 'ATTACK', isKeyDown);
             dispatchFlashKeyEvent(eventType, FLASH_NATIVE_KEYS.p1.ATTACK);
+            dispatchFlashKeyEvent(eventType, rawKey);
+            sendFastMessage({
+                type: 'hud_key',
+                role: 'p1',
+                action: 'ATTACK',
+                isActive: isKeyDown
+            });
         }
         return;
     }
 
-    // 1. TRƯỜNG HỢP HOST (P1):
-    // Dù Host dùng Option 1 (WASD), Option 2 (Mũi tên), hay Option 3 (Custom),
-    // code tự động chuyển thành bộ phím Native P1 (WASD + JKLU IO) và bắn vào Flash!
+    // 1. TRƯỜNG HỢP HOST:
     if (myRole === 'host') {
-        const action = findActionByCode(userKeyBindings.p1, code);
-        if (action) {
-            e.preventDefault();
-            const nativeKey = FLASH_NATIVE_KEYS.p1[action];
-            dispatchFlashKeyEvent(eventType, nativeKey);
+        // Phím P1 (WASD + JKLUIO)
+        const actionP1 = findActionByCode(userKeyBindings.p1, code);
+        if (actionP1) {
+            swallow();
+            if (e.repeat) return;
+            updateInputHud('p1', actionP1, isKeyDown);
+            dispatchFlashKeyEvent(eventType, FLASH_NATIVE_KEYS.p1[actionP1]);
+            if (actionP1 === 'ATTACK') {
+                dispatchFlashKeyEvent(eventType, { code: 'Enter', key: 'Enter', keyCode: 13, which: 13 });
+            }
+            sendFastMessage({
+                type: 'hud_key',
+                role: 'p1',
+                action: actionP1,
+                isActive: isKeyDown
+            });
+            return;
+        }
+
+        // Cho phép Host bấm 4 Mũi tên + Numpad điều khiển P2 trực tiếp trên máy Host
+        const actionP2 = findActionByCode(userKeyBindings.p2, code);
+        if (actionP2) {
+            swallow();
+            if (e.repeat) return;
+            updateInputHud('p2', actionP2, isKeyDown);
+            dispatchFlashKeyEvent(eventType, FLASH_NATIVE_KEYS.p2[actionP2]);
+            if (actionP2 === 'ATTACK') {
+                dispatchFlashKeyEvent(eventType, { code: 'Enter', key: 'Enter', keyCode: 13, which: 13 });
+            }
+            return;
         }
     }
     // 2. TRƯỜNG HỢP GUEST (P2):
-    // Dù Guest dùng Option 1 (WASD), Option 2 (Mũi tên), hay Option 3 (Custom),
-    // Guest gửi action sang Host -> Host nhận và tự động chuyển thành bộ phím Native P2 (4 Mũi tên + Numpad 1..6)
     else if (myRole === 'guest') {
         const action = findActionByCode(userKeyBindings.p2, code);
         if (action) {
-            e.preventDefault();
-            sendNetworkMessage({
+            swallow();
+            if (e.repeat) return;
+            updateInputHud('p2', action, isKeyDown);
+            sendFastMessage({
                 type: 'game_input',
                 role: 'p2',
                 action: action,
                 eventType: eventType
             });
+            return;
         }
     }
-    // 3. TRƯỜNG HỢP CHƠI ĐƠN OFFLINE (SOLO):
-    // Cả 2 người chơi trên cùng 1 máy tính
+    // 3. TRƯỜNG HỢP CHƠI ĐƠN (SOLO):
     else {
         const actionP1 = findActionByCode(userKeyBindings.p1, code);
         if (actionP1) {
-            e.preventDefault();
+            swallow();
+            if (e.repeat) return;
+            updateInputHud('p1', actionP1, isKeyDown);
             dispatchFlashKeyEvent(eventType, FLASH_NATIVE_KEYS.p1[actionP1]);
+            if (actionP1 === 'ATTACK') {
+                dispatchFlashKeyEvent(eventType, { code: 'Enter', key: 'Enter', keyCode: 13, which: 13 });
+            }
             return;
         }
         const actionP2 = findActionByCode(userKeyBindings.p2, code);
         if (actionP2) {
-            e.preventDefault();
+            swallow();
+            if (e.repeat) return;
+            updateInputHud('p2', actionP2, isKeyDown);
             dispatchFlashKeyEvent(eventType, FLASH_NATIVE_KEYS.p2[actionP2]);
+            if (actionP2 === 'ATTACK') {
+                dispatchFlashKeyEvent(eventType, { code: 'Enter', key: 'Enter', keyCode: 13, which: 13 });
+            }
             return;
         }
     }
@@ -684,19 +918,18 @@ function handleNetworkMessage(data) {
         startPingMeasurement();
 
         if (myRole === 'host') {
-            updateStatus('connected', `🟢 BẠN LÀ P1 (HOST): Đang phát trực tiếp 60FPS cho Khách!`);
-            showSyncNotification("🎮 Bạn là Host: Dùng W/S và J chọn 'Team VS' (1P vs 2P) để cùng đấu!");
-            // Thiết lập luồng WebRTC truyền màn hình sang Guest
+            updateStatus('connected', `🟢 BẠN LÀ P1 (HOST): Đang phát trực tiếp 60FPS HD cho Khách!`);
+            showSyncNotification("🎮 Đã kết nối với Khách! Host bấm S (xuống) chọn 'Vs Human' ➔ bấm Enter để cùng chọn tướng đấu 2 người!");
             setTimeout(setupHostWebRtc, 500);
         } else {
-            updateStatus('connected', `🟢 BẠN LÀ P2 (KHÁCH): Đang xem trực tiếp màn hình trận đấu của Host!`);
-            showSyncNotification("⏳ Đang đồng bộ màn hình từ Host... Bạn đã sẵn sàng điều khiển P2!");
+            updateStatus('connected', `🟢 BẠN LÀ P2 (KHÁCH): Đang xem trực tiếp 60FPS HD từ Host!`);
+            showSyncNotification("🟢 Đã kết nối với Chủ phòng (60FPS HD)! Bạn đang điều khiển P2. Sẵn sàng!");
             setupGuestWebRtc();
         }
         return;
     }
 
-    // 4. WebRTC Signaling (Offer, Answer, Candidate)
+    // 4. WebRTC Signaling (Offer, Answer, Candidate cho Remote Play)
     if (data.type === 'webrtc_offer') {
         handleWebRtcOffer(data.sdp);
         return;
@@ -710,35 +943,45 @@ function handleNetworkMessage(data) {
         return;
     }
 
-    // 5. Host nhận phím bấm từ Guest (P2)
+    // 5. Host nhận phím bấm từ Guest trong chế độ Remote Play
     if (data.type === 'game_input') {
+        // Cập nhật đèn báo phím P2 trên HUD của cả 2 máy
+        updateInputHud('p2', data.action === 'MENU_CONFIRM' ? 'ATTACK' : data.action, data.eventType === 'keydown');
+
         if (myRole === 'host') {
-            if (data.action === 'MENU_CONFIRM') {
-                dispatchFlashKeyEvent(data.eventType, FLASH_NATIVE_KEYS.p1.ATTACK);
-                return;
-            }
-            // TỰ ĐỘNG CHUYỂN ACTION THÀNH NATIVE P2 CỦA FLASH BVN
             const nativeKey = FLASH_NATIVE_KEYS.p2[data.action];
             if (nativeKey) {
                 dispatchFlashKeyEvent(data.eventType, nativeKey);
+                if (data.action === 'ATTACK') {
+                    dispatchFlashKeyEvent(data.eventType, { code: 'Enter', key: 'Enter', keyCode: 13, which: 13 });
+                }
             }
         }
         return;
     }
 
-    // 6. Yêu cầu khởi động lại game
-    if (data.type === 'sync_restart') {
-        showSyncNotification("🔄 Trận đấu đang được khởi động lại...");
-        if (myRole === 'host' || myRole === 'solo') {
-            initRuffleGame();
-            setTimeout(setupHostWebRtc, 1000);
+    if (data.type === 'raw_flash_key' && myRole === 'host') {
+        if (data.keyInfo) {
+            dispatchFlashKeyEvent(data.eventType, data.keyInfo);
         }
+        return;
+    }
+
+    // 6. Đồng bộ trạng thái đèn phím (HUD) giữa 2 máy
+    if (data.type === 'hud_key') {
+        updateInputHud(data.role, data.action, data.isActive);
+        return;
+    }
+
+    // 8. Yêu cầu khởi động lại ván đấu đồng bộ
+    if (data.type === 'sync_restart') {
+        triggerSynchronizedRestart();
         return;
     }
 
     // 7. Đo Ping
     if (data.type === 'ping') {
-        sendNetworkMessage({ type: 'pong', time: data.time });
+        sendFastMessage({ type: 'pong', time: data.time });
         return;
     }
     if (data.type === 'pong') {
@@ -791,6 +1034,19 @@ function joinRoomAsGuest(roomId) {
     btnJoinRoom.innerText = "Đang kết nối...";
     guestConnectionMsg.classList.remove('hidden');
     guestConnectionMsg.innerText = `Đang tìm phòng [${roomId}]...`;
+
+    // Ngừng chạy Flash trên máy Khách để không tốn CPU/bộ nhớ
+    pauseLocalRuffle();
+    const rPlayer = document.getElementById('rufflePlayer');
+    if (rPlayer) rPlayer.style.display = 'none';
+
+    // Giải phóng tiêu điểm (blur) khỏi ô nhập liệu để bàn phím không bị kẹt trong ô input!
+    if (inputRoomCode) inputRoomCode.blur();
+    if (document.activeElement && document.activeElement !== document.body) {
+        document.activeElement.blur();
+    }
+    window.focus();
+
     connectWebSocketAndSend({ type: 'join_room', roomId });
 }
 
@@ -830,21 +1086,39 @@ function connectWebSocketAndSend(initialMsg) {
 function startPingMeasurement() {
     if (pingInterval) clearInterval(pingInterval);
     pingInterval = setInterval(() => {
-        sendNetworkMessage({ type: 'ping', time: Date.now() });
+        sendFastMessage({ type: 'ping', time: Date.now() });
     }, 1000);
 }
 
 // Nút Đồng bộ lại / Khởi động lại
 btnSyncRestart.addEventListener('click', () => {
-    if (confirm("Khởi động lại game để đồng bộ lại trận đấu từ đầu?")) {
+    if (confirm("Khởi động lại game để đồng bộ ván mới từ Frame 0 trên cả 2 máy?")) {
         sendNetworkMessage({ type: 'sync_restart' });
-        if (myRole === 'host' || myRole === 'solo') {
-            initRuffleGame();
-            setTimeout(setupHostWebRtc, 1000);
-        }
-        showSyncNotification("🔄 Đang khởi động lại trận đấu...");
+        triggerSynchronizedRestart();
     }
 });
+
+function triggerSynchronizedRestart() {
+    let count = 3;
+    showSyncNotification(`🔄 Đồng bộ lại ván đấu từ Frame 0: ${count}...`, 3500);
+    const interval = setInterval(() => {
+        count--;
+        if (count > 0) {
+            showSyncNotification(`🔄 Đồng bộ lại ván đấu từ Frame 0: ${count}...`, 1500);
+        } else {
+            clearInterval(interval);
+            showSyncNotification("⚔️ BẮT ĐẦU VÁN MỚI! SẴN SÀNG CHIẾN ĐẤU!", 2500);
+            if (currentNetcodeMode === 'stream' && myRole === 'guest') {
+                // Remote Play: Khách không chạy game riêng, chờ Host gửi luồng hình mới
+                return;
+            }
+            initRuffleGame();
+            if (currentNetcodeMode === 'stream' && myRole === 'host') {
+                setTimeout(setupHostWebRtc, 1000);
+            }
+        }
+    }, 1000);
+}
 
 // Toàn màn hình
 btnFullscreen.addEventListener('click', () => {
@@ -868,14 +1142,54 @@ function updateRoleDisplay(role) {
         roleBadge.className = 'role-badge role-host';
         roleBadge.innerText = '🔴 BẠN LÀ P1 (HOST)';
         if (netcodeBadge) netcodeBadge.innerText = '⚡ 60FPS HD Remote Play (Host Engine)';
+        if (btnShareScreen) btnShareScreen.classList.remove('hidden');
     } else if (role === 'guest') {
         roleBadge.className = 'role-badge role-guest';
         roleBadge.innerText = '🔵 BẠN LÀ P2 (KHÁCH)';
         if (netcodeBadge) netcodeBadge.innerText = '⚡ 60FPS HD Remote Play (Màn hình đồng bộ)';
+        if (btnShareScreen) btnShareScreen.classList.add('hidden');
     } else {
         roleBadge.className = 'role-badge role-solo';
         roleBadge.innerText = '🎮 Chế độ: Chơi đơn';
+        if (btnShareScreen) btnShareScreen.classList.add('hidden');
     }
+}
+
+// Nút chia sẻ trực tiếp Tab 1080p 60FPS siêu nét cho Khách bằng phần cứng
+if (btnShareScreen) {
+    btnShareScreen.addEventListener('click', async () => {
+        try {
+            const stream = await navigator.mediaDevices.getDisplayMedia({
+                video: {
+                    displaySurface: 'browser',
+                    frameRate: { ideal: 60, max: 60 },
+                    width: { ideal: 1920 },
+                    height: { ideal: 1080 }
+                },
+                audio: true
+            });
+            const newVideoTrack = stream.getVideoTracks()[0];
+            if (newVideoTrack && peerConnection) {
+                const senders = peerConnection.getSenders();
+                const videoSender = senders.find(s => s.track && s.track.kind === 'video');
+                if (videoSender) {
+                    await videoSender.replaceTrack(newVideoTrack);
+                    tuneVideoSenderForLowLatency(videoSender);
+                    btnShareScreen.innerText = "✓ Đang phát Tab 1080p 60FPS";
+                    btnShareScreen.style.background = "#00ff88";
+                    btnShareScreen.style.color = "#000";
+                    showSyncNotification("🟢 Đã kích hoạt truyền hình ảnh Tab 1080p 60FPS siêu nét cho Khách!");
+                    newVideoTrack.onended = () => {
+                        btnShareScreen.innerText = "📺 Bật Tab 1080p 60FPS";
+                        btnShareScreen.style.background = "";
+                        btnShareScreen.style.color = "";
+                    };
+                }
+            }
+        } catch (e) {
+            console.warn("Screen share cancelled or failed:", e);
+        }
+    });
 }
 
 function showSyncNotification(msg, duration = 4000) {
@@ -953,10 +1267,14 @@ tabButtons.forEach(btn => {
     });
 });
 
-// Thay đổi Preset trong dropdown (Option 1, Option 2, Option 3)
+// Thay đổi Preset trong dropdown (Option 1 Laptop, Option 2 WASD, Option 3 Mũi tên, Option 4 Custom)
 presetSelect.addEventListener('change', (e) => {
     const selected = e.target.value;
-    if (selected === 'option_wasd') {
+    if (selected === 'option_laptop') {
+        tempBindings[editingKeyGroup] = JSON.parse(JSON.stringify(KEY_PRESETS.option_laptop));
+        tempBindings[editingKeyGroup + 'Preset'] = 'option_laptop';
+        renderModalBindings();
+    } else if (selected === 'option_wasd') {
         tempBindings[editingKeyGroup] = JSON.parse(JSON.stringify(KEY_PRESETS.option_wasd));
         tempBindings[editingKeyGroup + 'Preset'] = 'option_wasd';
         renderModalBindings();
@@ -1065,7 +1383,7 @@ btnSaveKeys.addEventListener('click', () => {
 });
 
 btnResetDefaultKeys.addEventListener('click', () => {
-    if (confirm("Khôi phục về mặc định: P1 dùng WASD, P2 dùng 4 Mũi tên?")) {
+    if (confirm("Khôi phục về mặc định chuẩn: P1 dùng WASD, P2 dùng 4 Mũi tên + Numpad 1..6?")) {
         tempBindings = {
             p1Preset: 'option_wasd',
             p2Preset: 'option_arrows',
@@ -1116,14 +1434,32 @@ function setupVirtualControls() {
             e.preventDefault();
             btn.classList.add('vbtn-active');
             if (myRole === 'guest') {
-                sendNetworkMessage({
-                    type: 'game_input',
-                    role: 'p2',
-                    action: keyAction,
-                    eventType: 'keydown'
-                });
+                if (currentNetcodeMode === 'esport') {
+                    dispatchFlashKeyEvent('keydown', FLASH_NATIVE_KEYS.p2[keyAction]);
+                    sendFastMessage({
+                        type: 'sync_input',
+                        role: 'p2',
+                        action: keyAction,
+                        eventType: 'keydown'
+                    });
+                } else {
+                    sendFastMessage({
+                        type: 'game_input',
+                        role: 'p2',
+                        action: keyAction,
+                        eventType: 'keydown'
+                    });
+                }
             } else {
                 dispatchFlashKeyEvent('keydown', FLASH_NATIVE_KEYS.p1[keyAction]);
+                if (currentNetcodeMode === 'esport' && myRole === 'host') {
+                    sendFastMessage({
+                        type: 'sync_input',
+                        role: 'p1',
+                        action: keyAction,
+                        eventType: 'keydown'
+                    });
+                }
             }
         };
 
@@ -1131,14 +1467,32 @@ function setupVirtualControls() {
             e.preventDefault();
             btn.classList.remove('vbtn-active');
             if (myRole === 'guest') {
-                sendNetworkMessage({
-                    type: 'game_input',
-                    role: 'p2',
-                    action: keyAction,
-                    eventType: 'keyup'
-                });
+                if (currentNetcodeMode === 'esport') {
+                    dispatchFlashKeyEvent('keyup', FLASH_NATIVE_KEYS.p2[keyAction]);
+                    sendFastMessage({
+                        type: 'sync_input',
+                        role: 'p2',
+                        action: keyAction,
+                        eventType: 'keyup'
+                    });
+                } else {
+                    sendFastMessage({
+                        type: 'game_input',
+                        role: 'p2',
+                        action: keyAction,
+                        eventType: 'keyup'
+                    });
+                }
             } else {
                 dispatchFlashKeyEvent('keyup', FLASH_NATIVE_KEYS.p1[keyAction]);
+                if (currentNetcodeMode === 'esport' && myRole === 'host') {
+                    sendFastMessage({
+                        type: 'sync_input',
+                        role: 'p1',
+                        action: keyAction,
+                        eventType: 'keyup'
+                    });
+                }
             }
         };
 
@@ -1155,6 +1509,7 @@ function setupVirtualControls() {
 // ==========================================
 window.addEventListener('DOMContentLoaded', () => {
     renderGuides();
+    syncHudKeyLabels();
     setupVirtualControls();
     initRuffleGame();
 

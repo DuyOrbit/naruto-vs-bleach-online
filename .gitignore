@@ -2,3 +2,15 @@ node_modules
 .DS_Store
 Thumbs.db
 *.log
+
+# Temporary test scripts & screenshots
+*.png
+test_*.js
+enter_*.js
+check_*.js
+inspect_*.js
+
+# Raw / Decompiled archives
+bvn2.6sieuvip/
+BleachVsNaruto-master/
+BleachVsNaruto_FlashSrc-master/

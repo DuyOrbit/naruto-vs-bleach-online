@@ -50,13 +50,17 @@
             <div class="game-toolbar">
                 <div class="toolbar-left">
                     <span class="role-badge role-solo" id="roleBadge">🎮 Chế độ: Chơi đơn</span>
-                    <span class="netcode-badge" id="netcodeBadge">⚡ 60FPS HD Remote Play (1080p Siêu Nét)</span>
-                </div>
+                    <span class="netcode-badge-fixed" title="1 Trận Chung: Máy Host chạy game và truyền hình ảnh 60FPS HD, máy Khách điều khiển P2. 100% Khớp trận!">
+                        📺 60FPS HD Remote Play (1 Trận Chung • 100% Khớp Trận)
+                    </span>
                 <div class="toolbar-right">
+                    <button id="btnShareScreen" class="btn btn-primary btn-sm btn-screen-share hidden" title="Chia sẻ Tab Game 1080p 60FPS bằng phần cứng siêu nét cho Khách">
+                        📺 Bật Tab 1080p 60FPS
+                    </button>
                     <button id="btnOpenKeyModal" class="btn btn-secondary btn-sm" title="Tùy chỉnh phím bấm cho P1 và P2">
                         ⚙️ Cài đặt phím
                     </button>
-                    <button id="btnSyncRestart" class="btn btn-secondary btn-sm" title="Khởi động lại game trên cả 2 máy để đồng bộ">
+                    <button id="btnSyncRestart" class="btn btn-secondary btn-sm btn-sync-restart" title="Khởi động lại game trên cả 2 máy để đồng bộ ván mới từ Frame 0">
                         🔄 Đồng bộ / Bắt đầu lại
                     </button>
                     <button id="btnFullscreen" class="btn btn-secondary btn-sm" title="Toàn màn hình">
@@ -65,8 +69,17 @@
                 </div>
             </div>
 
+            <!-- Banner Hướng dẫn chọn chế độ đấu 2 người -->
+            <div class="match-mode-alert" id="matchModeAlert">
+                <div class="alert-icon">🔥</div>
+                <div class="alert-content">
+                    <span class="alert-title">HƯỚNG DẪN ĐẤU 2 NGƯỜI (BVN 2.6):</span>
+                    <span class="alert-desc">Tại Menu chính, Host bấm <strong>S</strong> (xuống) chọn <span class="badge-highlight">Vs Human (Đấu 2 Người)</span> ➔ bấm <strong>Enter</strong> (hoặc <strong>J</strong>) để vào Chọn Tướng! Khách (P2) dùng <strong>4 Mũi tên (↑ ↓ ← →)</strong> di chuyển và <strong>Numpad 1</strong> (hoặc số 1) để chọn tướng!</span>
+                </div>
+            </div>
+
             <div class="game-container" id="gameContainer">
-                <!-- Ruffle Game Canvas (Chạy trực tiếp trên cả 2 máy, không dùng video stream) -->
+                <!-- Ruffle Game Canvas (Chạy trực tiếp trên Host, stream 60FPS HD cho Guest) -->
                 <div id="flashPlayerWrapper">
                     <div id="rufflePlayer"></div>
                     <video id="remoteVideo" class="hidden" autoplay playsinline muted></video>
@@ -77,6 +90,46 @@
                         <button id="btnSkipIntro" class="btn btn-sm btn-skip-intro hidden">
                             ⚡ Bỏ qua giới thiệu & Vào Game ngay
                         </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Real-time Input HUD (Đèn báo phím bấm trực tiếp) -->
+            <div class="input-hud" id="inputHud">
+                <div class="hud-player hud-p1">
+                    <span class="hud-label">🔴 P1 (Host):</span>
+                    <div class="hud-group" title="Di chuyển P1">
+                        <span class="hud-key" id="hud_p1_UP">W</span>
+                        <span class="hud-key" id="hud_p1_LEFT">A</span>
+                        <span class="hud-key" id="hud_p1_DOWN">S</span>
+                        <span class="hud-key" id="hud_p1_RIGHT">D</span>
+                    </div>
+                    <span class="hud-divider"></span>
+                    <div class="hud-group" title="Chiêu thức P1">
+                        <span class="hud-key" id="hud_p1_ATTACK">J</span>
+                        <span class="hud-key" id="hud_p1_JUMP">K</span>
+                        <span class="hud-key" id="hud_p1_DASH">L</span>
+                        <span class="hud-key" id="hud_p1_SUB">U</span>
+                        <span class="hud-key" id="hud_p1_ULTI">I</span>
+                        <span class="hud-key" id="hud_p1_ASSIST">O</span>
+                    </div>
+                </div>
+                <div class="hud-player hud-p2">
+                    <span class="hud-label hud-label-p2">🔵 P2 (Khách):</span>
+                    <div class="hud-group" title="Di chuyển P2">
+                        <span class="hud-key" id="hud_p2_UP">↑</span>
+                        <span class="hud-key" id="hud_p2_LEFT">←</span>
+                        <span class="hud-key" id="hud_p2_DOWN">↓</span>
+                        <span class="hud-key" id="hud_p2_RIGHT">→</span>
+                    </div>
+                    <span class="hud-divider"></span>
+                    <div class="hud-group" title="Chiêu thức P2">
+                        <span class="hud-key" id="hud_p2_ATTACK">Num 1</span>
+                        <span class="hud-key" id="hud_p2_JUMP">Num 2</span>
+                        <span class="hud-key" id="hud_p2_DASH">Num 3</span>
+                        <span class="hud-key" id="hud_p2_SUB">Num 4</span>
+                        <span class="hud-key" id="hud_p2_ULTI">Num 5</span>
+                        <span class="hud-key" id="hud_p2_ASSIST">Num 6</span>
                     </div>
                 </div>
             </div>
@@ -172,7 +225,7 @@
                         <!-- Render động qua JS -->
                     </div>
                     <div class="numpad-tip">
-                        💡 <em>Bạn đang dùng Laptop không có Numpad? Bấm nút <strong>"⚙️ Cài đặt phím"</strong> bên trên để chọn bộ phím chữ (IJKL + ZXCVBN) cực dễ đánh!</em>
+                        💡 <em>Khách (P2) mặc định chơi bằng <strong>4 phím Mũi tên (↑ ↓ ← →)</strong> và <strong>Numpad 1..6</strong> (hoặc hàng phím số 1..6).</em>
                     </div>
                 </div>
             </section>
@@ -186,13 +239,14 @@
                     <button id="btnCloseKeyModal" class="btn-close">&times;</button>
                 </div>
                 <div class="modal-body">
-                    <!-- Chọn Preset nhanh: 3 Option -->
+                    <!-- Chọn Preset nhanh: 4 Option -->
                     <div class="preset-selector">
                         <label for="presetSelect"><strong>Chọn kiểu điều khiển của bạn:</strong></label>
                         <select id="presetSelect" class="form-select">
-                            <option value="option_wasd">🎮 Option 1: Bộ phím WASD (W A S D + J K L U I O)</option>
-                            <option value="option_arrows">🎯 Option 2: Bộ phím 4 Mũi tên (↑ ↓ ← → + Phím 1..6 / Numpad)</option>
-                            <option value="option_custom">✏️ Option 3: Tự map phím theo ý thích (Custom cá nhân)</option>
+                            <option value="option_arrows">🎯 Option 1: Bộ 4 Mũi tên & Numpad (↑ ↓ ← → + Numpad 1..6) - Chuẩn Flash</option>
+                            <option value="option_wasd">🎮 Option 2: Bộ phím WASD (W A S D + J K L U I O) - Chuẩn P1</option>
+                            <option value="option_laptop">💻 Option 3: Bộ phím Laptop (IJKL di chuyển + ZXCVBN ra đòn)</option>
+                            <option value="option_custom">✏️ Option 4: Tự map phím theo ý thích (Custom cá nhân)</option>
                         </select>
                     </div>
 

@@ -802,9 +802,6 @@ function handleUserKeyEvent(e, eventType) {
             if (e.repeat) return;
             updateInputHud('p1', actionP1, isKeyDown);
             dispatchFlashKeyEvent(eventType, FLASH_NATIVE_KEYS.p1[actionP1]);
-            if (actionP1 === 'ATTACK') {
-                dispatchFlashKeyEvent(eventType, { code: 'Enter', key: 'Enter', keyCode: 13, which: 13 });
-            }
             sendFastMessage({
                 type: 'hud_key',
                 role: 'p1',
@@ -821,9 +818,6 @@ function handleUserKeyEvent(e, eventType) {
             if (e.repeat) return;
             updateInputHud('p2', actionP2, isKeyDown);
             dispatchFlashKeyEvent(eventType, FLASH_NATIVE_KEYS.p2[actionP2]);
-            if (actionP2 === 'ATTACK') {
-                dispatchFlashKeyEvent(eventType, { code: 'Enter', key: 'Enter', keyCode: 13, which: 13 });
-            }
             return;
         }
     }
@@ -851,9 +845,6 @@ function handleUserKeyEvent(e, eventType) {
             if (e.repeat) return;
             updateInputHud('p1', actionP1, isKeyDown);
             dispatchFlashKeyEvent(eventType, FLASH_NATIVE_KEYS.p1[actionP1]);
-            if (actionP1 === 'ATTACK') {
-                dispatchFlashKeyEvent(eventType, { code: 'Enter', key: 'Enter', keyCode: 13, which: 13 });
-            }
             return;
         }
         const actionP2 = findActionByCode(userKeyBindings.p2, code);
@@ -862,9 +853,6 @@ function handleUserKeyEvent(e, eventType) {
             if (e.repeat) return;
             updateInputHud('p2', actionP2, isKeyDown);
             dispatchFlashKeyEvent(eventType, FLASH_NATIVE_KEYS.p2[actionP2]);
-            if (actionP2 === 'ATTACK') {
-                dispatchFlashKeyEvent(eventType, { code: 'Enter', key: 'Enter', keyCode: 13, which: 13 });
-            }
             return;
         }
     }
@@ -952,9 +940,6 @@ function handleNetworkMessage(data) {
             const nativeKey = FLASH_NATIVE_KEYS.p2[data.action];
             if (nativeKey) {
                 dispatchFlashKeyEvent(data.eventType, nativeKey);
-                if (data.action === 'ATTACK') {
-                    dispatchFlashKeyEvent(data.eventType, { code: 'Enter', key: 'Enter', keyCode: 13, which: 13 });
-                }
             }
         }
         return;

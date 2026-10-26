@@ -19,7 +19,7 @@
         window.RufflePlayer.config = {
             autoplay: "on",
             letterbox: "on",
-            unmuteOverlay: "visible",
+            unmuteOverlay: "hidden",
             splashScreen: false,
             quality: "high"
         };
@@ -50,7 +50,7 @@
             <div class="game-toolbar">
                 <div class="toolbar-left">
                     <span class="role-badge role-solo" id="roleBadge">🎮 Chế độ: Chơi đơn</span>
-                    <span class="netcode-badge">⚡ P2P Local Engine (1080p Siêu Nét)</span>
+                    <span class="netcode-badge" id="netcodeBadge">⚡ 60FPS HD Remote Play (1080p Siêu Nét)</span>
                 </div>
                 <div class="toolbar-right">
                     <button id="btnOpenKeyModal" class="btn btn-secondary btn-sm" title="Tùy chỉnh phím bấm cho P1 và P2">
@@ -69,6 +69,7 @@
                 <!-- Ruffle Game Canvas (Chạy trực tiếp trên cả 2 máy, không dùng video stream) -->
                 <div id="flashPlayerWrapper">
                     <div id="rufflePlayer"></div>
+                    <video id="remoteVideo" class="hidden" autoplay playsinline muted></video>
                     <div id="loadingOverlay" class="loading-overlay">
                         <div class="spinner"></div>
                         <p id="loadingMsg">Đang tải Bleach vs Naruto (Local Engine)...</p>
@@ -185,14 +186,13 @@
                     <button id="btnCloseKeyModal" class="btn-close">&times;</button>
                 </div>
                 <div class="modal-body">
-                    <!-- Chọn Preset nhanh -->
+                    <!-- Chọn Preset nhanh: 3 Option -->
                     <div class="preset-selector">
-                        <label for="presetSelect"><strong>Gợi ý phím có sẵn:</strong></label>
+                        <label for="presetSelect"><strong>Chọn kiểu điều khiển của bạn:</strong></label>
                         <select id="presetSelect" class="form-select">
-                            <option value="preset_laptop_letter">⭐ Khuyên dùng cho Laptop: Phím chữ IJKL + ZXCVBN (Không cần Mũi tên & Numpad)</option>
-                            <option value="preset_laptop_num">Laptop có phím mũi tên: Mũi tên + Hàng số 1,2,3,4,5,6</option>
-                            <option value="preset_default_pc">Mặc định PC: Mũi tên + Numpad 1..6</option>
-                            <option value="custom">Tùy biến tự do (Tự chọn từng phím bên dưới)</option>
+                            <option value="option_wasd">🎮 Option 1: Bộ phím WASD (W A S D + J K L U I O)</option>
+                            <option value="option_arrows">🎯 Option 2: Bộ phím 4 Mũi tên (↑ ↓ ← → + Phím 1..6 / Numpad)</option>
+                            <option value="option_custom">✏️ Option 3: Tự map phím theo ý thích (Custom cá nhân)</option>
                         </select>
                     </div>
 

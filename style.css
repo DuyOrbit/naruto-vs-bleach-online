@@ -225,6 +225,21 @@ body {
     display: block;
 }
 
+#remoteVideo {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: #000;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    image-rendering: pixelated;
+    display: block;
+}
+
+#remoteVideo.hidden {
+    display: none;
+}
+
 .loading-overlay {
     position: absolute;
     inset: 0;

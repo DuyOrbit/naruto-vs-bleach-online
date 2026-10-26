@@ -10,8 +10,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
     
-    <!-- PeerJS (WebRTC P2P miễn phí) -->
-    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+    <!-- PeerJS (WebRTC P2P) -->
+    <script src="ruffle/peerjs.min.js"></script>
     
     <!-- Cấu hình Ruffle trước khi tải thư viện -->
     <script>
@@ -24,8 +24,8 @@
             quality: "high"
         };
     </script>
-    <!-- Ruffle (Flash Emulator WebAssembly Nightly - Hỗ trợ đầy đủ ActionScript 3 cho Bleach vs Naruto) -->
-    <script src="https://unpkg.com/@ruffle-rs/ruffle@nightly"></script>
+    <!-- Ruffle (Flash Emulator WebAssembly) -->
+    <script src="ruffle/ruffle.js"></script>
 </head>
 <body>
     <div class="app-container">
@@ -77,6 +77,32 @@
                             ⚡ Bỏ qua giới thiệu & Vào Game ngay
                         </button>
                     </div>
+                </div>
+            </div>
+
+            <!-- Thanh mẹo và phím ảo nhanh -->
+            <div class="game-hint-bar">
+                <span class="hint-icon">💡</span>
+                <span class="hint-text"><strong>Mẹo Menu:</strong> Dùng <strong>W / S</strong> để chọn chế độ, bấm <strong>J</strong> (hoặc <strong>Enter / Space</strong>) để <strong>CHỌN</strong>, bấm <strong>K</strong> để Quay lại! <em>(Nhấp chuột vào màn hình game nếu chưa nhận phím)</em></span>
+            </div>
+
+            <!-- Virtual Controls Bar (Phím ảo hỗ trợ bấm chuột trực tiếp) -->
+            <div class="virtual-controls-bar">
+                <div class="vpad-group">
+                    <span class="vpad-label">Di chuyển:</span>
+                    <button class="vbtn" data-key="UP" title="Lên (W)">⬆️ W</button>
+                    <button class="vbtn" data-key="DOWN" title="Xuống (S)">⬇️ S</button>
+                    <button class="vbtn" data-key="LEFT" title="Trái (A)">⬅️ A</button>
+                    <button class="vbtn" data-key="RIGHT" title="Phải (D)">➡️ D</button>
+                </div>
+                <div class="vpad-group">
+                    <span class="vpad-label">Hành động:</span>
+                    <button class="vbtn vbtn-primary" data-key="ATTACK" title="Đánh / Chọn Menu (J)">⚔️ J (Chọn)</button>
+                    <button class="vbtn" data-key="JUMP" title="Nhảy / Hủy (K)">🚀 K (Hủy)</button>
+                    <button class="vbtn" data-key="DASH" title="Lướt (L)">💨 L</button>
+                    <button class="vbtn" data-key="SUB" title="Chiêu phụ (U)">⚡ U</button>
+                    <button class="vbtn vbtn-accent" data-key="ULTI" title="Tuyệt kỹ Ulti (I)">💥 I (Ulti)</button>
+                    <button class="vbtn" data-key="ASSIST" title="Trợ thủ (O)">🛡️ O</button>
                 </div>
             </div>
 

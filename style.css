@@ -296,6 +296,123 @@ body {
     background: #000;
 }
 
+/* Floating Sync Notification */
+.sync-notify-box {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(15, 17, 26, 0.95);
+    border: 2px solid var(--naruto-orange);
+    color: #fff;
+    padding: 10px 24px;
+    border-radius: 30px;
+    font-family: var(--font-heading);
+    font-size: 0.95rem;
+    font-weight: 700;
+    box-shadow: 0 0 25px rgba(255, 119, 0, 0.5);
+    z-index: 100;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.sync-notify-box.hidden {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-50%) translateY(-15px);
+}
+
+/* Game Hint Bar */
+.game-hint-bar {
+    background: rgba(255, 119, 0, 0.1);
+    border: 1px solid rgba(255, 119, 0, 0.3);
+    border-radius: 8px;
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.92rem;
+    color: var(--text-primary);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.hint-icon {
+    font-size: 1.2rem;
+}
+
+.hint-text em {
+    color: var(--bleach-blue);
+    font-style: normal;
+}
+
+/* Virtual Controls Bar */
+.virtual-controls-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 10px 14px;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.vpad-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.vpad-label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-family: var(--font-heading);
+    margin-right: 4px;
+}
+
+.vbtn {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-family: var(--font-heading);
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.15s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+.vbtn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--bleach-blue);
+    transform: translateY(-1px);
+}
+
+.vbtn:active, .vbtn.vbtn-active {
+    background: var(--naruto-orange);
+    color: #fff;
+    transform: translateY(1px);
+    box-shadow: 0 0 10px rgba(255, 119, 0, 0.6);
+}
+
+.vbtn-primary {
+    background: rgba(255, 119, 0, 0.2);
+    border-color: var(--naruto-orange);
+    color: #ff9933;
+}
+
+.vbtn-accent {
+    background: rgba(0, 210, 255, 0.2);
+    border-color: var(--bleach-blue);
+    color: var(--bleach-blue);
+}
+
 /* Lobby / Room Panel */
 .lobby-panel {
     display: grid;

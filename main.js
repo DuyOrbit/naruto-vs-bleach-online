@@ -119,6 +119,128 @@ const KEY_PRESETS = {
     }
 };
 
+// ==========================================
+// 2B. CẤU HÌNH TAY CẦM (GAMEPAD)
+// ==========================================
+const GAMEPAD_BUTTON_NAMES = {
+    0: 'A / ✕ (Nút 0)',
+    1: 'B / ◯ (Nút 1)',
+    2: 'X / ▢ (Nút 2)',
+    3: 'Y / △ (Nút 3)',
+    4: 'LB / L1 (Nút 4)',
+    5: 'RB / R1 (Nút 5)',
+    6: 'LT / L2 (Cò trái)',
+    7: 'RT / R2 (Cò phải)',
+    8: 'Back / Select (Nút 8)',
+    9: 'Start / Menu (Nút 9)',
+    10: 'L3 (Cần trái nhấn)',
+    11: 'R3 (Cần phải nhấn)',
+    12: 'D-Pad Lên ↑',
+    13: 'D-Pad Xuống ↓',
+    14: 'D-Pad Trái ←',
+    15: 'D-Pad Phải →',
+    16: 'Home / Logo'
+};
+
+const GAMEPAD_AXIS_NAMES = {
+    'axis:0:-1': 'Cần trái ←',
+    'axis:0:1': 'Cần trái →',
+    'axis:1:-1': 'Cần trái ↑',
+    'axis:1:1': 'Cần trái ↓',
+    'axis:2:-1': 'Cần phải ←',
+    'axis:2:1': 'Cần phải →',
+    'axis:3:-1': 'Cần phải ↑',
+    'axis:3:1': 'Cần phải ↓'
+};
+
+const GAMEPAD_ACTIONS = [
+    { action: 'UP', label: 'Di chuyển: Lên (↑ / Nhảy trèo)' },
+    { action: 'DOWN', label: 'Di chuyển: Xuống (↓ / Ngồi đỡ)' },
+    { action: 'LEFT', label: 'Di chuyển: Trái (← / Lùi tiến)' },
+    { action: 'RIGHT', label: 'Di chuyển: Phải (→ / Tiến lùi)' },
+    { action: 'ATTACK', label: 'Đánh thường / Chọn Menu (J)' },
+    { action: 'JUMP', label: 'Nhảy / Hủy Menu (K)' },
+    { action: 'DASH', label: 'Lướt né đòn (L)' },
+    { action: 'SUB', label: 'Chiêu phụ (U)' },
+    { action: 'ULTI', label: 'Tuyệt kỹ Ulti (I)' },
+    { action: 'ASSIST', label: 'Gọi hỗ trợ (O)' },
+    { action: 'START', label: 'Nút Menu / Vào trận (Start / Enter)' }
+];
+
+const GAMEPAD_PRESETS = {
+    standard: {
+        name: 'Chuẩn Đối Kháng Arcade',
+        buttons: {
+            UP:     { type: 'button', index: 12, display: 'D-Pad ↑ / Cần trái ↑' },
+            DOWN:   { type: 'button', index: 13, display: 'D-Pad ↓ / Cần trái ↓' },
+            LEFT:   { type: 'button', index: 14, display: 'D-Pad ← / Cần trái ←' },
+            RIGHT:  { type: 'button', index: 15, display: 'D-Pad → / Cần trái →' },
+            ATTACK: { type: 'button', index: 0,  display: 'A / ✕ (Nút 0)' },
+            JUMP:   { type: 'button', index: 1,  display: 'B / ◯ (Nút 1)' },
+            DASH:   { type: 'button', index: 5,  display: 'RB / R1 (Nút 5)' },
+            SUB:    { type: 'button', index: 2,  display: 'X / ▢ (Nút 2)' },
+            ULTI:   { type: 'button', index: 3,  display: 'Y / △ (Nút 3)' },
+            ASSIST: { type: 'button', index: 4,  display: 'LB / L1 (Nút 4)' },
+            START:  { type: 'button', index: 9,  display: 'Start / Menu (Nút 9)' }
+        }
+    },
+    ninja_storm: {
+        name: 'Kiểu Ninja Storm',
+        buttons: {
+            UP:     { type: 'button', index: 12, display: 'D-Pad ↑ / Cần trái ↑' },
+            DOWN:   { type: 'button', index: 13, display: 'D-Pad ↓ / Cần trái ↓' },
+            LEFT:   { type: 'button', index: 14, display: 'D-Pad ← / Cần trái ←' },
+            RIGHT:  { type: 'button', index: 15, display: 'D-Pad → / Cần trái →' },
+            ATTACK: { type: 'button', index: 1,  display: 'B / ◯ (Nút 1)' },
+            JUMP:   { type: 'button', index: 0,  display: 'A / ✕ (Nút 0)' },
+            DASH:   { type: 'button', index: 5,  display: 'RB / R1 (Nút 5)' },
+            SUB:    { type: 'button', index: 2,  display: 'X / ▢ (Nút 2)' },
+            ULTI:   { type: 'button', index: 3,  display: 'Y / △ (Nút 3)' },
+            ASSIST: { type: 'button', index: 4,  display: 'LB / L1 (Nút 4)' },
+            START:  { type: 'button', index: 9,  display: 'Start / Menu (Nút 9)' }
+        }
+    },
+    triggers: {
+        name: 'Dùng Cò LT / RT',
+        buttons: {
+            UP:     { type: 'button', index: 12, display: 'D-Pad ↑ / Cần trái ↑' },
+            DOWN:   { type: 'button', index: 13, display: 'D-Pad ↓ / Cần trái ↓' },
+            LEFT:   { type: 'button', index: 14, display: 'D-Pad ← / Cần trái ←' },
+            RIGHT:  { type: 'button', index: 15, display: 'D-Pad → / Cần trái →' },
+            ATTACK: { type: 'button', index: 0,  display: 'A / ✕ (Nút 0)' },
+            JUMP:   { type: 'button', index: 1,  display: 'B / ◯ (Nút 1)' },
+            DASH:   { type: 'button', index: 7,  display: 'RT / R2 (Cò phải)' },
+            SUB:    { type: 'button', index: 2,  display: 'X / ▢ (Nút 2)' },
+            ULTI:   { type: 'button', index: 3,  display: 'Y / △ (Nút 3)' },
+            ASSIST: { type: 'button', index: 6,  display: 'LT / L2 (Cò trái)' },
+            START:  { type: 'button', index: 9,  display: 'Start / Menu (Nút 9)' }
+        }
+    }
+};
+
+let userGamepadConfig = loadGamepadConfig();
+
+function loadGamepadConfig() {
+    const saved = localStorage.getItem('bvn_user_gamepad_v1');
+    if (saved) {
+        try {
+            return JSON.parse(saved);
+        } catch (e) {
+            console.error("Lỗi parse saved gamepad config:", e);
+        }
+    }
+    return {
+        target: 'auto', // 'auto' | 'p1' | 'p2' | 'dual'
+        preset: 'standard',
+        buttons: JSON.parse(JSON.stringify(GAMEPAD_PRESETS.standard.buttons))
+    };
+}
+
+function saveGamepadConfig(cfg) {
+    userGamepadConfig = cfg;
+    localStorage.setItem('bvn_user_gamepad_v1', JSON.stringify(cfg));
+}
+
 // Quản lý cấu hình phím
 let userKeyBindings = loadKeyBindings();
 
@@ -225,6 +347,19 @@ const bindingListP1 = document.getElementById('bindingListP1');
 const bindingListP2 = document.getElementById('bindingListP2');
 const btnSaveKeys = document.getElementById('btnSaveKeys');
 const btnResetDefaultKeys = document.getElementById('btnResetDefaultKeys');
+
+// Gamepad Elements
+const btnGamepadStatus = document.getElementById('btnGamepadStatus');
+const gamepadStatusText = document.getElementById('gamepadStatusText');
+const keyboardPresetSelector = document.getElementById('keyboardPresetSelector');
+const gamepadInfoCard = document.getElementById('gamepadInfoCard');
+const gpDeviceTitle = document.getElementById('gpDeviceTitle');
+const gpDeviceDesc = document.getElementById('gpDeviceDesc');
+const btnTestVibration = document.getElementById('btnTestVibration');
+const gpTesterBadges = document.getElementById('gpTesterBadges');
+const gamepadTargetSelect = document.getElementById('gamepadTargetSelect');
+const gamepadPresetSelect = document.getElementById('gamepadPresetSelect');
+const bindingListGamepad = document.getElementById('bindingListGamepad');
 
 // Guide Grids
 const guideGridP1 = document.getElementById('guideGridP1');
@@ -1211,12 +1346,15 @@ btnCopyLink.addEventListener('click', () => {
 // ==========================================
 // 9. MODAL CÀI ĐẶT PHÍM (3 OPTIONS & CUSTOM MAP)
 // ==========================================
-let editingKeyGroup = 'p1'; // 'p1' | 'p2'
+let editingKeyGroup = 'p1'; // 'p1' | 'p2' | 'gamepad'
 let activeRecordingButton = null;
+let activeRecordingGamepadButton = null;
 let tempBindings = JSON.parse(JSON.stringify(userKeyBindings));
+let tempGamepadConfig = JSON.parse(JSON.stringify(userGamepadConfig));
 
 btnOpenKeyModal.addEventListener('click', () => {
     tempBindings = JSON.parse(JSON.stringify(userKeyBindings));
+    tempGamepadConfig = JSON.parse(JSON.stringify(userGamepadConfig));
 
     // Mặc định chọn tab phù hợp với vai trò hiện tại
     if (myRole === 'guest') {
@@ -1228,21 +1366,44 @@ btnOpenKeyModal.addEventListener('click', () => {
     keyModal.classList.remove('hidden');
 });
 
+if (btnGamepadStatus) {
+    btnGamepadStatus.addEventListener('click', () => {
+        tempBindings = JSON.parse(JSON.stringify(userKeyBindings));
+        tempGamepadConfig = JSON.parse(JSON.stringify(userGamepadConfig));
+        switchModalTab('tabGamepad');
+        keyModal.classList.remove('hidden');
+    });
+}
+
 btnCloseKeyModal.addEventListener('click', () => {
     cancelActiveRecording();
+    cancelActiveGamepadRecording();
     keyModal.classList.add('hidden');
 });
 
 function switchModalTab(tabId) {
+    cancelActiveRecording();
+    cancelActiveGamepadRecording();
+
     tabButtons.forEach(b => {
         b.classList.toggle('active', b.getAttribute('data-tab') === tabId);
     });
     tabContents.forEach(c => {
         c.classList.toggle('active', c.id === tabId);
     });
-    editingKeyGroup = tabId === 'tabP1' ? 'p1' : 'p2';
-    presetSelect.value = tempBindings[editingKeyGroup + 'Preset'] || 'option_custom';
-    renderModalBindings();
+
+    if (tabId === 'tabGamepad') {
+        editingKeyGroup = 'gamepad';
+        if (keyboardPresetSelector) keyboardPresetSelector.style.display = 'none';
+        if (gamepadTargetSelect) gamepadTargetSelect.value = tempGamepadConfig.target || 'auto';
+        if (gamepadPresetSelect) gamepadPresetSelect.value = tempGamepadConfig.preset || 'standard';
+        renderGamepadBindings();
+    } else {
+        if (keyboardPresetSelector) keyboardPresetSelector.style.display = 'flex';
+        editingKeyGroup = tabId === 'tabP1' ? 'p1' : 'p2';
+        if (presetSelect) presetSelect.value = tempBindings[editingKeyGroup + 'Preset'] || 'option_custom';
+        renderModalBindings();
+    }
 }
 
 tabButtons.forEach(btn => {
@@ -1252,7 +1413,7 @@ tabButtons.forEach(btn => {
     });
 });
 
-// Thay đổi Preset trong dropdown (Option 1 Laptop, Option 2 WASD, Option 3 Mũi tên, Option 4 Custom)
+// Thay đổi Preset trong dropdown bàn phím
 presetSelect.addEventListener('change', (e) => {
     const selected = e.target.value;
     if (selected === 'option_laptop') {
@@ -1271,6 +1432,31 @@ presetSelect.addEventListener('change', (e) => {
         tempBindings[editingKeyGroup + 'Preset'] = 'option_custom';
     }
 });
+
+if (gamepadTargetSelect) {
+    gamepadTargetSelect.addEventListener('change', (e) => {
+        tempGamepadConfig.target = e.target.value;
+    });
+}
+
+if (gamepadPresetSelect) {
+    gamepadPresetSelect.addEventListener('change', (e) => {
+        const val = e.target.value;
+        if (val !== 'custom' && GAMEPAD_PRESETS[val]) {
+            tempGamepadConfig.preset = val;
+            tempGamepadConfig.buttons = JSON.parse(JSON.stringify(GAMEPAD_PRESETS[val].buttons));
+            renderGamepadBindings();
+        } else {
+            tempGamepadConfig.preset = 'custom';
+        }
+    });
+}
+
+if (btnTestVibration) {
+    btnTestVibration.addEventListener('click', () => {
+        vibrateGamepad(250, 0.7, 0.7);
+    });
+}
 
 function renderModalBindings() {
     renderBindingGroupList('p1', bindingListP1);
@@ -1310,6 +1496,7 @@ function renderBindingGroupList(group, container) {
 
 function startRecordingKey(btn, group, action) {
     cancelActiveRecording();
+    cancelActiveGamepadRecording();
 
     activeRecordingButton = btn;
     btn.classList.add('recording');
@@ -1349,6 +1536,54 @@ function cancelActiveRecording() {
     }
 }
 
+function renderGamepadBindings() {
+    if (!bindingListGamepad) return;
+    bindingListGamepad.innerHTML = '';
+    const currentButtons = tempGamepadConfig.buttons || {};
+
+    GAMEPAD_ACTIONS.forEach(({ action, label }) => {
+        const boundInfo = currentButtons[action] || { display: 'Chưa gán' };
+
+        const row = document.createElement('div');
+        row.className = 'binding-row';
+
+        const labelEl = document.createElement('span');
+        labelEl.className = 'binding-label';
+        labelEl.innerText = label;
+
+        const btn = document.createElement('button');
+        btn.className = 'bind-key-btn';
+        btn.innerText = boundInfo.display;
+        btn.dataset.action = action;
+
+        btn.addEventListener('click', () => {
+            startRecordingGamepadKey(btn, action);
+        });
+
+        row.appendChild(labelEl);
+        row.appendChild(btn);
+        bindingListGamepad.appendChild(row);
+    });
+}
+
+function startRecordingGamepadKey(btn, action) {
+    cancelActiveRecording();
+    cancelActiveGamepadRecording();
+
+    activeRecordingGamepadButton = { btn, action };
+    btn.classList.add('recording');
+    btn.innerText = 'Bấm nút trên tay cầm...';
+}
+
+function cancelActiveGamepadRecording() {
+    if (activeRecordingGamepadButton) {
+        const { btn, action } = activeRecordingGamepadButton;
+        btn.innerText = tempGamepadConfig.buttons[action]?.display || 'Chưa gán';
+        btn.classList.remove('recording');
+        activeRecordingGamepadButton = null;
+    }
+}
+
 function formatKeyDisplay(e) {
     if (e.code.startsWith('Key')) return e.code.replace('Key', '');
     if (e.code.startsWith('Digit')) return 'Số ' + e.code.replace('Digit', '');
@@ -1363,21 +1598,357 @@ function formatKeyDisplay(e) {
 
 btnSaveKeys.addEventListener('click', () => {
     saveKeyBindings(tempBindings);
+    saveGamepadConfig(tempGamepadConfig);
     keyModal.classList.add('hidden');
-    showSyncNotification("✓ Đã lưu cài đặt bàn phím thành công!");
+    showSyncNotification("✓ Đã lưu cài đặt bàn phím & tay cầm thành công!");
 });
 
 btnResetDefaultKeys.addEventListener('click', () => {
-    if (confirm("Khôi phục về mặc định chuẩn: P1 dùng WASD, P2 dùng 4 Mũi tên + Numpad 1..6?")) {
-        tempBindings = {
-            p1Preset: 'option_wasd',
-            p2Preset: 'option_arrows',
-            p1: JSON.parse(JSON.stringify(KEY_PRESETS.option_wasd)),
-            p2: JSON.parse(JSON.stringify(KEY_PRESETS.option_arrows))
-        };
-        presetSelect.value = tempBindings[editingKeyGroup + 'Preset'];
-        renderModalBindings();
+    if (editingKeyGroup === 'gamepad') {
+        if (confirm("Khôi phục cấu hình tay cầm về mặc định Chuẩn Đối Kháng Arcade?")) {
+            tempGamepadConfig = {
+                target: 'auto',
+                preset: 'standard',
+                buttons: JSON.parse(JSON.stringify(GAMEPAD_PRESETS.standard.buttons))
+            };
+            if (gamepadTargetSelect) gamepadTargetSelect.value = 'auto';
+            if (gamepadPresetSelect) gamepadPresetSelect.value = 'standard';
+            renderGamepadBindings();
+        }
+    } else {
+        if (confirm("Khôi phục về mặc định chuẩn: P1 dùng WASD, P2 dùng 4 Mũi tên + Numpad 1..6?")) {
+            tempBindings = {
+                p1Preset: 'option_wasd',
+                p2Preset: 'option_arrows',
+                p1: JSON.parse(JSON.stringify(KEY_PRESETS.option_wasd)),
+                p2: JSON.parse(JSON.stringify(KEY_PRESETS.option_arrows))
+            };
+            if (presetSelect) presetSelect.value = tempBindings[editingKeyGroup + 'Preset'];
+            renderModalBindings();
+        }
     }
+});
+
+// Escape key hủy gán phím hoặc tay cầm
+window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        if (activeRecordingButton) cancelActiveRecording();
+        if (activeRecordingGamepadButton) cancelActiveGamepadRecording();
+    }
+});
+
+// ==========================================
+// 9B. ENGINE TAY CẦM (GAMEPAD POLLING & DISPATCH)
+// ==========================================
+let lastGamepadActionStates = { p1: {}, p2: {} };
+
+function isButtonPressed(gp, bind) {
+    if (!gp || !bind) return false;
+    if (bind.type === 'button') {
+        const btn = gp.buttons[bind.index];
+        if (!btn) return false;
+        return typeof btn === 'object' ? (btn.pressed || btn.value > 0.5) : btn > 0.5;
+    }
+    if (bind.type === 'axis') {
+        const val = gp.axes[bind.axisIndex];
+        if (val === undefined) return false;
+        return bind.direction < 0 ? val < -0.5 : val > 0.5;
+    }
+    return false;
+}
+
+function vibrateGamepad(duration = 150, weak = 0.5, strong = 0.5) {
+    try {
+        const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+        for (const gp of gamepads) {
+            if (gp && gp.vibrationActuator && typeof gp.vibrationActuator.playEffect === 'function') {
+                gp.vibrationActuator.playEffect('dual-rumble', {
+                    startDelay: 0,
+                    duration: duration,
+                    weakMagnitude: weak,
+                    strongMagnitude: strong
+                }).catch(() => {});
+            }
+        }
+    } catch (e) {}
+}
+
+function dispatchActionFromGamepad(targetRole, action, isDown) {
+    const eventType = isDown ? 'keydown' : 'keyup';
+
+    // 1. Phím START (Enter / Menu chọn / Bắt đầu trận)
+    if (action === 'START') {
+        const rawKey = { code: 'Enter', key: 'Enter', keyCode: 13, which: 13 };
+        if (targetRole === 'p2' && myRole === 'guest') {
+            updateInputHud('p2', 'ATTACK', isDown);
+            sendFastMessage({
+                type: 'game_input',
+                role: 'p2',
+                action: 'ATTACK',
+                eventType: eventType
+            });
+            sendFastMessage({
+                type: 'raw_flash_key',
+                keyInfo: rawKey,
+                eventType: eventType
+            });
+        } else {
+            updateInputHud(targetRole, 'ATTACK', isDown);
+            dispatchFlashKeyEvent(eventType, FLASH_NATIVE_KEYS[targetRole].ATTACK);
+            dispatchFlashKeyEvent(eventType, rawKey);
+            if (myRole === 'host') {
+                sendFastMessage({
+                    type: 'hud_key',
+                    role: targetRole,
+                    action: 'ATTACK',
+                    isActive: isDown
+                });
+            }
+        }
+        return;
+    }
+
+    // 2. Các hành động thông thường (UP, DOWN, LEFT, RIGHT, ATTACK, JUMP, DASH, SUB, ULTI, ASSIST)
+    if (targetRole === 'p1') {
+        updateInputHud('p1', action, isDown);
+        dispatchFlashKeyEvent(eventType, FLASH_NATIVE_KEYS.p1[action]);
+        if (myRole === 'host') {
+            sendFastMessage({
+                type: 'hud_key',
+                role: 'p1',
+                action: action,
+                isActive: isDown
+            });
+        }
+    } else if (targetRole === 'p2') {
+        updateInputHud('p2', action, isDown);
+        if (myRole === 'guest') {
+            sendFastMessage({
+                type: 'game_input',
+                role: 'p2',
+                action: action,
+                eventType: eventType
+            });
+        } else {
+            dispatchFlashKeyEvent(eventType, FLASH_NATIVE_KEYS.p2[action]);
+        }
+    }
+}
+
+function updateGamepadToolbarStatus(activeGamepads) {
+    if (!btnGamepadStatus || !gamepadStatusText) return;
+    if (activeGamepads.length > 0) {
+        btnGamepadStatus.classList.add('connected');
+        const first = activeGamepads[0];
+        let name = first.id || 'Gamepad';
+        if (name.length > 18) name = name.substring(0, 16) + '...';
+        gamepadStatusText.textContent = `Tay cầm: ${name}`;
+    } else {
+        btnGamepadStatus.classList.remove('connected');
+        gamepadStatusText.textContent = 'Tay cầm: Chưa cắm';
+    }
+}
+
+function updateGamepadModalUI(activeGamepads) {
+    if (!gamepadInfoCard || !gpDeviceTitle || !gpDeviceDesc) return;
+
+    if (activeGamepads.length > 0) {
+        gamepadInfoCard.classList.add('connected');
+        const gp = activeGamepads[0];
+        let cleanId = gp.id || 'Gamepad';
+        gpDeviceTitle.textContent = `✅ Đã kết nối: ${cleanId}`;
+        gpDeviceDesc.textContent = `Số nút: ${gp.buttons.length} • Cần analog: ${gp.axes.length} trục • Cổng: #${gp.index}`;
+        if (btnTestVibration) {
+            btnTestVibration.classList.toggle('hidden', !gp.vibrationActuator);
+        }
+
+        // Live Button Tester
+        if (gpTesterBadges) {
+            const activeBadges = [];
+            gp.buttons.forEach((btn, idx) => {
+                if (btn && (btn.pressed || btn.value > 0.5)) {
+                    const name = GAMEPAD_BUTTON_NAMES[idx] || `Nút ${idx}`;
+                    activeBadges.push(`<span class="gp-tester-badge">${name}</span>`);
+                }
+            });
+            gp.axes.forEach((val, idx) => {
+                if (val < -0.5) {
+                    const name = GAMEPAD_AXIS_NAMES[`axis:${idx}:-1`] || `Axis ${idx} -`;
+                    activeBadges.push(`<span class="gp-tester-badge">${name}</span>`);
+                } else if (val > 0.5) {
+                    const name = GAMEPAD_AXIS_NAMES[`axis:${idx}:1`] || `Axis ${idx} +`;
+                    activeBadges.push(`<span class="gp-tester-badge">${name}</span>`);
+                }
+            });
+
+            if (activeBadges.length > 0) {
+                gpTesterBadges.innerHTML = activeBadges.join('');
+            } else {
+                gpTesterBadges.innerHTML = `<span class="gp-empty-hint">Chưa có nút nào đang nhấn...</span>`;
+            }
+        }
+    } else {
+        gamepadInfoCard.classList.remove('connected');
+        gpDeviceTitle.textContent = 'Chưa phát hiện tay cầm nào';
+        gpDeviceDesc.textContent = 'Hãy cắm tay cầm (Xbox, PS4/PS5, Logitech, Dobe, Bluetooth...) và bấm phím bất kỳ trên tay cầm để kích hoạt nhận diện.';
+        if (btnTestVibration) btnTestVibration.classList.add('hidden');
+        if (gpTesterBadges) {
+            gpTesterBadges.innerHTML = `<span class="gp-empty-hint">Vui lòng cắm tay cầm vào máy tính...</span>`;
+        }
+    }
+}
+
+function checkGamepadRecordingInput(activeGamepads) {
+    if (!activeRecordingGamepadButton || activeGamepads.length === 0) return;
+    const gp = activeGamepads[0];
+    const { btn, action } = activeRecordingGamepadButton;
+
+    // Quét kiểm tra nút bấm
+    for (let i = 0; i < gp.buttons.length; i++) {
+        const b = gp.buttons[i];
+        if (b && (b.pressed || b.value > 0.6)) {
+            const displayName = GAMEPAD_BUTTON_NAMES[i] || `Nút ${i}`;
+            tempGamepadConfig.buttons[action] = {
+                type: 'button',
+                index: i,
+                display: displayName
+            };
+            tempGamepadConfig.preset = 'custom';
+            if (gamepadPresetSelect) gamepadPresetSelect.value = 'custom';
+            btn.innerText = displayName;
+            btn.classList.remove('recording');
+            activeRecordingGamepadButton = null;
+            vibrateGamepad(80, 0.4, 0.4);
+            return;
+        }
+    }
+
+    // Quét kiểm tra cần gạt analog
+    for (let i = 0; i < gp.axes.length; i++) {
+        const val = gp.axes[i];
+        if (Math.abs(val) > 0.65) {
+            const dir = val < 0 ? -1 : 1;
+            const axisKey = `axis:${i}:${dir}`;
+            const displayName = GAMEPAD_AXIS_NAMES[axisKey] || `Cần trục ${i} ${dir > 0 ? '+' : '-'}`;
+            tempGamepadConfig.buttons[action] = {
+                type: 'axis',
+                axisIndex: i,
+                direction: dir,
+                display: displayName
+            };
+            tempGamepadConfig.preset = 'custom';
+            if (gamepadPresetSelect) gamepadPresetSelect.value = 'custom';
+            btn.innerText = displayName;
+            btn.classList.remove('recording');
+            activeRecordingGamepadButton = null;
+            vibrateGamepad(80, 0.4, 0.4);
+            return;
+        }
+    }
+}
+
+function processGamepadControls(activeGamepads) {
+    if (activeGamepads.length === 0) return;
+
+    const targetMode = userGamepadConfig.target || 'auto';
+
+    activeGamepads.forEach((gp, idx) => {
+        let assignedRole = null;
+        if (targetMode === 'p1') {
+            assignedRole = (idx === 0) ? 'p1' : null;
+        } else if (targetMode === 'p2') {
+            assignedRole = (idx === 0) ? 'p2' : null;
+        } else if (targetMode === 'dual') {
+            assignedRole = (idx === 0) ? 'p1' : (idx === 1 ? 'p2' : null);
+        } else {
+            // 'auto': Nếu là Guest thì P2, nếu là Host/Solo thì tay 1 = P1, tay 2 = P2 (nếu có 2 tay)
+            if (myRole === 'guest') {
+                assignedRole = (idx === 0) ? 'p2' : null;
+            } else {
+                assignedRole = (idx === 0) ? 'p1' : (idx === 1 ? 'p2' : null);
+            }
+        }
+
+        if (!assignedRole) return;
+
+        const mapping = userGamepadConfig.buttons;
+        if (!mapping) return;
+
+        const currentStates = {};
+
+        // Di chuyển: Hỗ trợ cả D-pad lẫn Cần gạt Analog Trái (Deadzone 0.45)
+        currentStates.UP = isButtonPressed(gp, mapping.UP) || (gp.axes[1] !== undefined && gp.axes[1] < -0.45);
+        currentStates.DOWN = isButtonPressed(gp, mapping.DOWN) || (gp.axes[1] !== undefined && gp.axes[1] > 0.45);
+        currentStates.LEFT = isButtonPressed(gp, mapping.LEFT) || (gp.axes[0] !== undefined && gp.axes[0] < -0.45);
+        currentStates.RIGHT = isButtonPressed(gp, mapping.RIGHT) || (gp.axes[0] !== undefined && gp.axes[0] > 0.45);
+
+        // Các chiêu thức & Menu Start
+        ['ATTACK', 'JUMP', 'DASH', 'SUB', 'ULTI', 'ASSIST', 'START'].forEach(act => {
+            currentStates[act] = isButtonPressed(gp, mapping[act]);
+        });
+
+        // Edge detection & dispatch event
+        const lastStates = lastGamepadActionStates[assignedRole] || {};
+        for (const [action, isDown] of Object.entries(currentStates)) {
+            const wasDown = !!lastStates[action];
+            if (isDown !== wasDown) {
+                dispatchActionFromGamepad(assignedRole, action, isDown);
+                lastStates[action] = isDown;
+            }
+        }
+        lastGamepadActionStates[assignedRole] = lastStates;
+    });
+}
+
+function pollGamepadsLoop() {
+    if (navigator.getGamepads) {
+        const rawGamepads = navigator.getGamepads();
+        const activeGamepads = [];
+        for (let i = 0; i < rawGamepads.length; i++) {
+            if (rawGamepads[i]) {
+                activeGamepads.push(rawGamepads[i]);
+            }
+        }
+
+        // Cập nhật nhãn Toolbar
+        updateGamepadToolbarStatus(activeGamepads);
+
+        const isModalOpen = keyModal && !keyModal.classList.contains('hidden');
+        const isGamepadTab = isModalOpen && editingKeyGroup === 'gamepad';
+
+        if (isGamepadTab) {
+            updateGamepadModalUI(activeGamepads);
+            if (activeRecordingGamepadButton) {
+                checkGamepadRecordingInput(activeGamepads);
+            }
+        }
+
+        // Xử lý nút điều khiển khi không đang bấm gán nút
+        if (!activeRecordingGamepadButton) {
+            processGamepadControls(activeGamepads);
+        }
+    }
+
+    requestAnimationFrame(pollGamepadsLoop);
+}
+
+// Bắt sự kiện cắm / ngắt tay cầm
+window.addEventListener('gamepadconnected', (e) => {
+    showSyncNotification(`🎮 Đã kết nối tay cầm: ${e.gamepad.id || 'Gamepad'}!`);
+    vibrateGamepad(120, 0.4, 0.4);
+});
+
+window.addEventListener('gamepaddisconnected', (e) => {
+    showSyncNotification(`🔌 Đã ngắt kết nối tay cầm: ${e.gamepad.id || 'Gamepad'}`);
+    ['p1', 'p2'].forEach(role => {
+        const lastStates = lastGamepadActionStates[role] || {};
+        for (const [action, wasDown] of Object.entries(lastStates)) {
+            if (wasDown) {
+                dispatchActionFromGamepad(role, action, false);
+            }
+        }
+        lastGamepadActionStates[role] = {};
+    });
 });
 
 // Render danh sách phím hướng dẫn bên dưới giao diện
@@ -1405,6 +1976,11 @@ function renderGuideList(userGroup, nativeGroup, container) {
         div.innerHTML = `<kbd>${userGroup[act].display}</kbd><span>${nativeGroup[act].label}</span>`;
         container.appendChild(div);
     });
+
+    const gpTip = document.createElement('div');
+    gpTip.style.cssText = 'color: #ffaa00; font-size: 0.82rem; margin-top: 4px;';
+    gpTip.innerHTML = `<span>🎮 <em>Tay cầm: D-Pad / Analog di chuyển • A: Đánh (J) • B: Nhảy (K) • RB: Lướt (L) • X: Phụ (U) • Y: Ulti (I) • LB: Trợ thủ (O) • Start: Menu</em></span>`;
+    container.appendChild(gpTip);
 }
 
 // ==========================================
@@ -1497,6 +2073,7 @@ window.addEventListener('DOMContentLoaded', () => {
     syncHudKeyLabels();
     setupVirtualControls();
     initRuffleGame();
+    pollGamepadsLoop(); // Bắt đầu vòng lặp đọc dữ liệu tay cầm 60FPS
 
     // Hỗ trợ tự kết nối khi mở qua link mời (?room=bvn-xxxx)
     const urlParams = new URLSearchParams(window.location.search);

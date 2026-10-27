@@ -3,12 +3,15 @@ node_modules
 Thumbs.db
 *.log
 
-# Temporary test scripts & screenshots
-*.png
+# Temporary test scripts
 test_*.js
 enter_*.js
 check_*.js
 inspect_*.js
+
+# Allow screenshots for documentation / README
+!screenshots/
+!screenshots/*.png
 
 # Raw / Decompiled archives
 bvn2.6sieuvip/

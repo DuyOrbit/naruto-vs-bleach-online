@@ -1067,6 +1067,185 @@ kbd {
     to { box-shadow: 0 0 16px rgba(0, 210, 255, 0.7); }
 }
 
+/* ==========================================
+   GAMEPAD (TAY CẦM) STYLES
+   ========================================== */
+.modal-card.modal-card-wide {
+    max-width: 680px;
+}
+
+.btn-gamepad-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(25, 31, 51, 0.75);
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    font-family: var(--font-heading);
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.btn-gamepad-badge:hover {
+    border-color: var(--bleach-blue);
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 0 10px rgba(0, 210, 255, 0.25);
+}
+
+.btn-gamepad-badge.connected {
+    background: rgba(0, 255, 136, 0.12);
+    border-color: rgba(0, 255, 136, 0.45);
+    color: var(--success-green);
+    box-shadow: 0 0 12px rgba(0, 255, 136, 0.2);
+}
+
+.btn-gamepad-badge .gamepad-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #555;
+    transition: all 0.2s;
+}
+
+.btn-gamepad-badge.connected .gamepad-dot {
+    background: var(--success-green);
+    box-shadow: 0 0 8px var(--success-green);
+}
+
+.tab-btn-gamepad {
+    color: #ffaa00 !important;
+}
+
+.tab-btn-gamepad.active {
+    color: #ffcc00 !important;
+    border-bottom-color: #ffcc00 !important;
+}
+
+.gamepad-info-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: all 0.3s ease;
+}
+
+.gamepad-info-card.connected {
+    border-color: rgba(0, 255, 136, 0.45);
+    background: linear-gradient(135deg, rgba(0, 255, 136, 0.08), rgba(25, 31, 51, 0.95));
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.1);
+}
+
+.gp-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.gp-icon {
+    font-size: 2rem;
+    line-height: 1;
+}
+
+.gp-details {
+    flex: 1;
+}
+
+.gp-details h4 {
+    margin: 0;
+    font-size: 1.05rem;
+    color: #fff;
+    font-family: var(--font-heading);
+    letter-spacing: 0.5px;
+}
+
+.gp-details p {
+    margin: 4px 0 0 0;
+    font-size: 0.84rem;
+    color: var(--text-muted);
+    line-height: 1.35;
+}
+
+.gp-live-tester {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--border-color);
+}
+
+.gp-tester-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.gp-tester-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-height: 30px;
+    align-items: center;
+}
+
+.gp-tester-badge {
+    background: linear-gradient(135deg, #00d2ff, #0088ff);
+    color: #000;
+    font-size: 0.78rem;
+    font-weight: 800;
+    font-family: var(--font-heading);
+    padding: 3px 10px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 210, 255, 0.5);
+    animation: gpBadgePop 0.15s ease-out;
+}
+
+@keyframes gpBadgePop {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.gp-empty-hint {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+.gamepad-controls-config {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+@media (max-width: 600px) {
+    .gamepad-controls-config {
+        grid-template-columns: 1fr;
+    }
+}
+
+.config-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background: var(--bg-card);
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.config-row label {
+    font-size: 0.88rem;
+    color: var(--text-primary);
+}
+
 .hidden {
     display: none !important;
 }
+

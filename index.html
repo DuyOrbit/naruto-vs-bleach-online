@@ -53,12 +53,18 @@
                     <span class="netcode-badge-fixed" title="1 Trận Chung: Máy Host chạy game và truyền hình ảnh 60FPS HD, máy Khách điều khiển P2. 100% Khớp trận!">
                         📺 60FPS HD Remote Play (1 Trận Chung • 100% Khớp Trận)
                     </span>
+                    <button id="btnGamepadStatus" class="btn-gamepad-badge" title="Nhấp để kiểm tra & cài đặt phím tay cầm (Gamepad)">
+                        <span class="gamepad-icon">🎮</span>
+                        <span id="gamepadStatusText">Tay cầm: Chưa cắm</span>
+                        <span class="gamepad-dot"></span>
+                    </button>
+                </div>
                 <div class="toolbar-right">
                     <button id="btnShareScreen" class="btn btn-primary btn-sm btn-screen-share hidden" title="Chia sẻ Tab Game 1080p 60FPS bằng phần cứng siêu nét cho Khách">
                         📺 Bật Tab 1080p 60FPS
                     </button>
-                    <button id="btnOpenKeyModal" class="btn btn-secondary btn-sm" title="Tùy chỉnh phím bấm cho P1 và P2">
-                        ⚙️ Cài đặt phím
+                    <button id="btnOpenKeyModal" class="btn btn-secondary btn-sm" title="Tùy chỉnh phím bấm cho P1, P2 và Tay cầm Gamepad">
+                        ⚙️ Cài đặt phím & Tay cầm
                     </button>
                     <button id="btnSyncRestart" class="btn btn-secondary btn-sm btn-sync-restart" title="Khởi động lại game trên cả 2 máy để đồng bộ ván mới từ Frame 0">
                         🔄 Đồng bộ / Bắt đầu lại
@@ -231,29 +237,30 @@
             </section>
         </main>
 
-        <!-- MODAL CÀI ĐẶT BÀN PHÍM (KEYBINDINGS MODAL) -->
+        <!-- MODAL CÀI ĐẶT BÀN PHÍM & TAY CẦM (CONTROLS MODAL) -->
         <div id="keyModal" class="modal-backdrop hidden">
-            <div class="modal-card">
+            <div class="modal-card modal-card-wide">
                 <div class="modal-header">
-                    <h3>⚙️ CÀI ĐẶT BÀN PHÍM</h3>
+                    <h3>⚙️ CÀI ĐẶT ĐIỀU KHIỂN (BÀN PHÍM & TAY CẦM)</h3>
                     <button id="btnCloseKeyModal" class="btn-close">&times;</button>
                 </div>
                 <div class="modal-body">
-                    <!-- Chọn Preset nhanh: 4 Option -->
-                    <div class="preset-selector">
-                        <label for="presetSelect"><strong>Chọn kiểu điều khiển của bạn:</strong></label>
+                    <!-- Tabs chọn Thiết bị / Người chơi -->
+                    <div class="key-tabs">
+                        <button class="tab-btn active" data-tab="tabP2">🔵 Phím P2 (Khách)</button>
+                        <button class="tab-btn" data-tab="tabP1">🔴 Phím P1 (Host)</button>
+                        <button class="tab-btn tab-btn-gamepad" data-tab="tabGamepad">🎮 Cài Đặt Tay Cầm (Gamepad)</button>
+                    </div>
+
+                    <!-- Chọn Preset bàn phím nhanh: 4 Option (Ẩn khi xem tab Tay cầm) -->
+                    <div class="preset-selector" id="keyboardPresetSelector">
+                        <label for="presetSelect"><strong>Chọn kiểu phím bàn phím:</strong></label>
                         <select id="presetSelect" class="form-select">
                             <option value="option_arrows">🎯 Option 1: Bộ 4 Mũi tên & Numpad (↑ ↓ ← → + Numpad 1..6) - Chuẩn Flash</option>
                             <option value="option_wasd">🎮 Option 2: Bộ phím WASD (W A S D + J K L U I O) - Chuẩn P1</option>
                             <option value="option_laptop">💻 Option 3: Bộ phím Laptop (IJKL di chuyển + ZXCVBN ra đòn)</option>
                             <option value="option_custom">✏️ Option 4: Tự map phím theo ý thích (Custom cá nhân)</option>
                         </select>
-                    </div>
-
-                    <!-- Tabs chọn Người chơi -->
-                    <div class="key-tabs">
-                        <button class="tab-btn active" data-tab="tabP2">🔵 Phím Người Chơi 2 (P2 / Khách)</button>
-                        <button class="tab-btn" data-tab="tabP1">🔴 Phím Người Chơi 1 (P1 / Host)</button>
                     </div>
 
                     <!-- Nội dung cài phím P2 -->
@@ -268,6 +275,59 @@
                     <div id="tabP1" class="tab-content">
                         <p class="tab-note">Bấm vào ô phím bạn muốn đổi, sau đó nhấn phím mới trên bàn phím:</p>
                         <div class="binding-list" id="bindingListP1">
+                            <!-- Sinh tự động từ JS -->
+                        </div>
+                    </div>
+
+                    <!-- Nội dung cài Tay cầm Gamepad -->
+                    <div id="tabGamepad" class="tab-content">
+                        <!-- Trạng thái thiết bị tay cầm -->
+                        <div class="gamepad-info-card" id="gamepadInfoCard">
+                            <div class="gp-card-header">
+                                <span class="gp-icon">🎮</span>
+                                <div class="gp-details">
+                                    <h4 id="gpDeviceTitle">Chưa phát hiện tay cầm nào</h4>
+                                    <p id="gpDeviceDesc">Hãy cắm tay cầm (Xbox, PlayStation, Logitech, Dobe, Bluetooth...) và bấm phím bất kỳ trên tay cầm để kích hoạt.</p>
+                                </div>
+                                <button type="button" id="btnTestVibration" class="btn btn-sm btn-secondary hidden" title="Rung thử mô-tơ tay cầm">
+                                    📳 Rung thử
+                                </button>
+                            </div>
+
+                            <!-- Live Button Tester -->
+                            <div class="gp-live-tester" id="gpLiveTester">
+                                <span class="gp-tester-label">Đèn nhận diện nút bấm tay cầm trực tiếp:</span>
+                                <div class="gp-tester-badges" id="gpTesterBadges">
+                                    <span class="gp-empty-hint">Chưa có nút nào đang nhấn...</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cài đặt đối tượng điều khiển & Preset -->
+                        <div class="gamepad-controls-config">
+                            <div class="config-row">
+                                <label for="gamepadTargetSelect"><strong>Tay cầm dùng để điều khiển:</strong></label>
+                                <select id="gamepadTargetSelect" class="form-select">
+                                    <option value="auto">🎯 Tự động theo vai trò (Host/Solo: P1 • Khách: P2)</option>
+                                    <option value="p1">🔴 Luôn điều khiển Người chơi 1 (P1 / Host)</option>
+                                    <option value="p2">🔵 Luôn điều khiển Người chơi 2 (P2 / Khách)</option>
+                                    <option value="dual">👥 2 Tay cầm riêng biệt (Tay #1 = P1, Tay #2 = P2 khi đấu 2P)</option>
+                                </select>
+                            </div>
+
+                            <div class="config-row">
+                                <label for="gamepadPresetSelect"><strong>Chọn kiểu phím tay cầm (Preset):</strong></label>
+                                <select id="gamepadPresetSelect" class="form-select">
+                                    <option value="standard">🎯 Preset 1: Chuẩn Đối Kháng Arcade (A: Đánh, B: Nhảy, X: Chiêu phụ, Y: Ulti, RB: Lướt, LB: Trợ thủ)</option>
+                                    <option value="ninja_storm">⚡ Preset 2: Kiểu Ninja Storm (A: Nhảy, B: Đánh, X: Chiêu phụ, Y: Ulti, RB: Lướt, LB: Trợ thủ)</option>
+                                    <option value="triggers">🎮 Preset 3: Dùng Cò LT/RT (RT: Lướt, LT: Trợ thủ, A: Đánh, B: Nhảy, X: Chiêu phụ, Y: Ulti)</option>
+                                    <option value="custom">✏️ Preset 4: Tự cấu hình nút tay cầm (Custom)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <p class="tab-note">Bấm vào ô nút bạn muốn đổi, sau đó nhấn nút tương ứng trên tay cầm (hoặc gạt cần) để gán lại:</p>
+                        <div class="binding-list" id="bindingListGamepad">
                             <!-- Sinh tự động từ JS -->
                         </div>
                     </div>

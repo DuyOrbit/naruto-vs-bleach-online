@@ -4,10 +4,14 @@
   "description": "Bleach vs Naruto 2.6 Online P2P",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "screenshot": "node take_screenshots.js"
   },
   "dependencies": {
     "express": "^4.19.2",
     "ws": "^8.22.0"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.64.1"
   }
 }

@@ -1,75 +1,148 @@
-# Bleach vs Naruto 2.6 - WebRTC Online P2P (Input Sync Edition)
+# ⚔️ Bleach vs Naruto 2.6 - Online P2P (60FPS HD Remote Play)
 
-Trang web chơi game đối kháng **Bleach vs Naruto 2.6** trực tiếp trên trình duyệt, hỗ trợ chơi Online 2 người qua mạng **WebRTC Peer-to-Peer** với cơ chế **Đồng bộ phím thời gian thực (P2P Input Sync)**.
+[![Status](https://img.shields.io/badge/Status-Online%20P2P-brightgreen.svg)](#)
+[![Engine](https://img.shields.io/badge/Engine-Ruffle%20Flash%20WASM-orange.svg)](#)
+[![WebRTC](https://img.shields.io/badge/Network-WebRTC%20P2P-blue.svg)](#)
+[![Remote Play](https://img.shields.io/badge/Netcode-60FPS%20HD%20Sync-purple.svg)](#)
+[![Gamepad](https://img.shields.io/badge/Controller-Gamepad%20API-success.svg)](#)
+
+Dự án đưa tựa game đối kháng huyền thoại tuổi thơ **Bleach vs Naruto 2.6** lên trình duyệt web hiện đại, cho phép 2 người chơi so tài qua mạng Internet thông qua **WebRTC Peer-to-Peer** với công nghệ **60FPS HD Remote Play** (1 trận chung, 100% khớp trận, không lệch frame) cùng hỗ trợ đầy đủ **Bàn phím** và **Tay cầm (Gamepad / Controller)**.
+
+---
+
+## 📸 Hình ảnh giao diện (Screenshots)
+
+### 1. Màn hình trận đấu chính (Main Interface)
+Giao diện sắc nét 1080p chạy trên nền WebAssembly Ruffle Flash với toolbar điều khiển, đèn báo trạng thái vai trò và hệ thống Input HUD trực quan.
+
+![Giao diện chính Bleach vs Naruto Online](screenshots/01_main_interface.png)
+
+---
+
+### 2. Cài đặt Tay Cầm Gamepad (Gamepad Settings & Live Tester)
+Hỗ trợ mọi loại tay cầm (Xbox, PlayStation, Logitech, Dobe, Bluetooth...). Tích hợp Live Button Tester, kiểm tra độ rung Haptics, 3 bộ Preset chuẩn và tùy ý đổi nút theo sở thích.
+
+![Cài đặt Tay Cầm Gamepad](screenshots/02_gamepad_settings.png)
+
+---
+
+### 3. Cài đặt Bàn Phím Đa Dạng (Keyboard Presets)
+Hỗ trợ 4 kiểu điều khiển bàn phím linh hoạt: Chuẩn Flash (4 Mũi tên & Numpad), Chuẩn P1 (WASD), Bộ phím Laptop (IJKL + ZXCVBN không cần Numpad), và Tự do map phím cá nhân.
+
+![Cài đặt Bàn Phím P1 và P2](screenshots/03_keyboard_settings.png)
+
+---
+
+### 4. Phòng Đấu Online (Lobby) & Hướng Dẫn Điều Khiển
+Tạo phòng lấy mã / link mời 1 chạm, thanh phím ảo (Virtual Controls) hỗ trợ bấm chuột, đèn báo Real-time Input HUD và bảng phím chi tiết.
+
+![Lobby & Hướng dẫn điều khiển](screenshots/04_lobby_and_guide.png)
 
 ---
 
 ## 🚀 Tính năng nổi bật
 
-- **Local Engine 1080p Siêu Nét:** Game chạy trực tiếp trên cả 2 máy bằng giả lập **Ruffle Flash (WebAssembly)**, hình ảnh sắc nét 100%, không bị nén mờ video hay giật hình do băng thông.
-- **Tiết kiệm băng thông & Ping cực thấp:** Hai máy chỉ trao đổi tín hiệu phím bấm (chỉ vài byte mỗi giây), độ trễ cực thấp ngay cả khi mạng yếu.
-- **Cài đặt phím tự do (Dành riêng cho Laptop):**
-  - Không cần bàn phím số Numpad!
-  - Cung cấp sẵn preset **Phím Chữ Laptop (IJKL di chuyển + ZXCVBN ra đòn)** cực kỳ thoải mái và dễ bấm combo.
-  - Hỗ trợ đổi phím tùy biến 100% theo ý thích cá nhân.
-- **Nút Đồng bộ & Bắt đầu lại (Sync Restart):** Khởi động lại game trên cả 2 máy cùng lúc chỉ với 1 click để trận đấu luôn đồng bộ.
-- **Tạo phòng & Vào phòng 1 chạm:** Tự động sinh mã phòng và link mời trực tiếp (`?room=bvn-xxxx`).
-- **Hỗ trợ đo Ping thời gian thực:** Hiển thị độ trễ mạng tính bằng `ms`.
+### 🎮 1. Hỗ trợ Tay Cầm Chơi Game (Gamepad API)
+- **Tương thích toàn diện:** Xbox (360, One, Series X|S), PlayStation (DualShock 4, DualSense PS5), Logitech, Nintendo Switch Pro Controller, tay cầm USB/Bluetooth giá rẻ.
+- **Di chuyển thông minh:** Tự động hỗ trợ cả **D-Pad** lẫn **Cần gạt Analog Trái (Thumbstick)** với cơ chế Deadzone `0.45` chống trôi cần.
+- **Nút Start vào trận:** Bấm `Start` trên tay cầm tự động gửi lệnh `Enter` và `J (Chọn)` để điều hướng menu và vào trận mà không cần chạm bàn phím.
+- **Đèn nhận diện nút bấm trực tiếp (Live Button Tester):** Kiểm tra tín hiệu các nút bấm ngay trong bảng cài đặt theo thời gian thực.
+- **Phản hồi rung (Haptics Rumble):** Nút kiểm tra rung mô-tơ tay cầm chân thực.
+- **Chơi 2 người trên 1 máy tính:** Tự động gán hoặc chọn riêng biệt (Tay #1 = P1, Tay #2 = P2) để 2 bạn bè cắm 2 tay cầm đấu đối kháng cùng nhau.
+
+### 📺 2. 60FPS HD Remote Play (1 Trận Chung • 100% Khớp Trận)
+- Khắc phục triệt để vấn đề "lệch trận / desync" của các bản game Flash cũ.
+- Máy Host chạy game gốc và stream hình ảnh sắc nét 60FPS HD kèm âm thanh qua WebRTC Canvas Capture cho máy Khách.
+- Máy Khách gửi tín hiệu điều khiển P2 siêu tốc (độ trễ dưới 15ms qua WebRTC DataChannel).
+
+### ⌨️ 3. 4 Kiểu Điều Khiển Bàn Phím (Keyboard Presets)
+- **Option 1 (Chuẩn Flash):** 4 Mũi tên (`↑` `↓` `←` `→`) + Numpad `1..6` (hỗ trợ cả hàng phím số `1..6`).
+- **Option 2 (Chuẩn P1):** `W` `A` `S` `D` di chuyển + `J` `K` `L` `U` `I` `O` ra đòn.
+- **Option 3 (Dành riêng cho Laptop):** `I` `J` `K` `L` di chuyển + `Z` `X` `C` `V` `B` `N` ra đòn (không lo bàn phím laptop thiếu phím Numpad).
+- **Option 4 (Tự map phím Custom):** Nhấp chọn ô phím và ấn phím mới bất kỳ trên bàn phím.
+
+### 🔴 4. Đèn Báo Phím Thời Gian Thực (Input HUD) & Phím Ảo (Virtual Controls)
+- Hiển thị trực tiếp các nút mà P1 và P2 đang bấm trên màn hình.
+- Thanh phím ảo (Virtual Controls Bar) hỗ trợ thao tác bằng chuột hoặc màn hình cảm ứng.
+
+### 🔄 5. Bỏ qua Giới thiệu & Đồng bộ Ván Mới (Sync Restart)
+- Bỏ qua nhanh đoạn intro mở đầu chỉ bằng 1 nút bấm.
+- Nút "Đồng bộ / Bắt đầu lại" giúp khởi động lại game từ Frame 0 trên cả 2 máy khi muốn bắt đầu ván đấu mới.
 
 ---
 
-## 🎮 Bảng điều khiển mặc định
+## 🕹 Bảng điều khiển mặc định
 
 ### Người chơi 1 (P1 / Host)
-- **Di chuyển:** `W`, `A`, `S`, `D`
-- **Đánh thường:** `J` • **Nhảy:** `K` • **Lướt / Né:** `L`
-- **Chiêu phụ:** `U` • **Tuyệt kỹ (Ulti):** `I` • **Gọi trợ thủ:** `O`
+| Hành động | Bàn phím (WASD) | Tay cầm (Arcade Preset) |
+| :--- | :--- | :--- |
+| **Di chuyển** | `W` `A` `S` `D` | D-Pad hoặc Cần gạt Analog Trái |
+| **Đánh thường / Chọn Menu** | `J` | Nút `A` (Xbox) / `✕` (PlayStation) |
+| **Nhảy / Hủy Menu** | `K` | Nút `B` (Xbox) / `◯` (PlayStation) |
+| **Lướt / Né đòn** | `L` | Nút `RB` / `R1` |
+| **Chiêu phụ** | `U` | Nút `X` / `▢` |
+| **Tuyệt kỹ (Ulti)** | `I` | Nút `Y` / `△` |
+| **Gọi trợ thủ** | `O` | Nút `LB` / `L1` |
+| **Bắt đầu / Menu** | `Enter` / `Space` | Nút `Start` / `Options` |
 
-### Người chơi 2 (P2 / Khách - Preset Laptop khuyên dùng)
-- **Di chuyển:** `I`, `J`, `K`, `L` (Không cần dùng phím mũi tên nhỏ của laptop)
-- **Đánh thường:** `Z` • **Nhảy:** `X` • **Lướt / Né:** `C`
-- **Chiêu phụ:** `V` • **Tuyệt kỹ (Ulti):** `B` • **Gọi trợ thủ:** `N`
-*(Bạn có thể bấm nút **"⚙️ Cài đặt phím"** trên web để đổi sang bất kỳ phím nào khác tùy thích).*
+### Người chơi 2 (P2 / Khách)
+| Hành động | Bàn phím (Option 1) | Bàn phím (Laptop) | Tay cầm (Gamepad) |
+| :--- | :--- | :--- | :--- |
+| **Di chuyển** | `↑` `↓` `←` `→` | `I` `J` `K` `L` | D-Pad / Cần Analog |
+| **Đánh thường / Chọn** | `Numpad 1` (hoặc số `1`) | `Z` | Nút `A` / `✕` |
+| **Nhảy / Hủy** | `Numpad 2` (hoặc số `2`) | `X` | Nút `B` / `◯` |
+| **Lướt / Né** | `Numpad 3` (hoặc số `3`) | `C` | Nút `RB` / `R1` |
+| **Chiêu phụ** | `Numpad 4` (hoặc số `4`) | `V` | Nút `X` / `▢` |
+| **Tuyệt kỹ (Ulti)** | `Numpad 5` (hoặc số `5`) | `B` | Nút `Y` / `△` |
+| **Gọi trợ thủ** | `Numpad 6` (hoặc số `6`) | `N` | Nút `LB` / `L1` |
 
 ---
 
-## 🛠 Hướng dẫn đẩy lên GitHub và Host trên Render
+## 🔥 Hướng dẫn chọn chế độ đấu 2 người trong game (BVN 2.6)
 
-### Bước 1: Khởi tạo Git và đẩy lên GitHub
+1. Tại màn hình Menu chính của game, Host bấm phím **S** (xuống) hoặc gạt cần gạt tay cầm xuống để chọn mục **Vs Human (Đấu 2 Người)**.
+2. Bấm phím **Enter** (hoặc **J** / nút **A** trên tay cầm) để vào màn hình Chọn Tướng.
+3. **P1 (Host):** Dùng `W A S D` và phím `J` (hoặc nút `A` tay cầm) để chọn nhân vật.
+4. **P2 (Khách):** Dùng `4 Mũi tên` và phím `Numpad 1` / `Số 1` (hoặc nút `A` tay cầm) để chọn nhân vật.
 
-Mở PowerShell tại thư mục này và chạy các lệnh:
+---
 
+## 🛠 Hướng dẫn chạy trên máy (Local Development)
+
+### Yêu cầu:
+- [Node.js](https://nodejs.org/) (phiên bản 18 trở lên).
+
+### Các bước cài đặt:
 ```bash
-git init
-git add .
-git commit -m "Khoi tao Bleach vs Naruto Online WebRTC"
-git branch -M main
-git remote add origin https://github.com/<tai-khoan-github-cua-ban>/<ten-repo>.git
-git push -u origin main
+# 1. Clone repository về máy
+git clone https://github.com/DuyOrbit/naruto-vs-bleach-online.git
+cd naruto-vs-bleach-online
+
+# 2. Cài đặt các thư viện cần thiết
+npm install
+
+# 3. Chạy server phát triển
+npm start
 ```
 
-*(Thay `<tai-khoan-github-cua-ban>` và `<ten-repo>` bằng repository GitHub bạn vừa tạo).*
+Mở trình duyệt truy cập: **`http://localhost:3000`** (hoặc qua WAMP/XAMPP tại `http://localhost/naruto-vs-bleach-online`).
 
 ---
 
-### Bước 2: Deploy lên Render (Miễn phí 100%, không bị Sleep)
+## 🌐 Hướng dẫn chơi Online cùng bạn bè (Deploy)
 
+### Cách 1: Sử dụng Render.com (Miễn phí 100%)
 1. Đăng nhập vào [Render.com](https://render.com/).
-2. Nhấn **New +** $\rightarrow$ Chọn **Static Site**.
-3. Chọn Repository GitHub bạn vừa push ở Bước 1.
-4. Điền các thông tin:
-   - **Name:** Đặt tên web của bạn (ví dụ: `bleach-vs-naruto-online`).
-   - **Branch:** `main`
-   - **Build Command:** Để trống (vì là web tĩnh).
-   - **Publish Directory:** `.` (hoặc `./`).
-5. Nhấn **Create Static Site**.
-6. Render sẽ cung cấp cho bạn một đường link có dạng: `https://bleach-vs-naruto-online.onrender.com`.
+2. Nhấn **New +** $\rightarrow$ Chọn **Web Service**.
+3. Kết nối với Repository GitHub `DuyOrbit/naruto-vs-bleach-online`.
+4. Điền cấu hình:
+   - **Environment:** `Node`
+   - **Build Command:** `npm install`
+   - **Start Command:** `node server.js`
+5. Nhấn **Create Web Service**. Sau khi hoàn tất, Render sẽ cấp cho bạn đường link (ví dụ: `https://naruto-vs-bleach-online.onrender.com`).
+6. Bạn vào web, nhấn **"Tạo phòng mới"** $\rightarrow$ bấm **"🔗 Copy Link Mời Bạn Bè"** và gửi cho bạn bè để chiến cùng nhau ngay lập tức!
 
 ---
 
-## 🌐 Cách chơi cùng bạn bè
-
-1. Bạn vào link Render của bạn.
-2. Nhấn nút **"Tạo phòng mới"** $\rightarrow$ Bấm nút **"🔗 Copy Link Mời Bạn Bè"**.
-3. Gửi link đó cho bạn bè qua Messenger/Zalo/Discord.
-4. Bạn bè click vào link $\rightarrow$ Web tự động kết nối, bạn bè sẽ trở thành P2 và có thể so tài cùng bạn ngay lập tức!
+## 📜 Giấy phép & Bản quyền
+Dự án được xây dựng cho mục đích học tập và giải trí phi thương mại. Mọi tài sản hình ảnh, âm thanh và mã nguồn gốc Flash của trò chơi *Bleach vs Naruto 2.6* thuộc về nhà phát triển gốc Jianhun (剑魂).

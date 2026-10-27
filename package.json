@@ -8,6 +8,7 @@
     "screenshot": "node take_screenshots.js"
   },
   "dependencies": {
+    "compression": "^1.8.2",
     "express": "^4.19.2",
     "ws": "^8.22.0"
   },

@@ -1237,9 +1237,31 @@ function joinRoomAsGuest(roomId) {
     connectWebSocketAndSend({ type: 'join_room', roomId });
 }
 
+function getWebSocketUrl() {
+    if (window.BVN_WS_URL) return window.BVN_WS_URL;
+    const customWs = localStorage.getItem('bvn_custom_ws_url');
+    if (customWs) return customWs;
+
+    const hostname = window.location.hostname;
+    // Chạy local / mạng LAN nội bộ
+    if (!hostname || hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '0.0.0.0') {
+        const wsProto = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+        return `${wsProto}${window.location.host}`;
+    }
+
+    // Nếu chạy trên các nền tảng Static Hosting (Cloudflare Pages, Vercel, GitHub Pages)
+    // Tự động kết nối tới Render Signaling Server
+    if (hostname.endsWith('.pages.dev') || hostname.endsWith('.vercel.app') || hostname.endsWith('.github.io')) {
+        return 'wss://naruto-vs-bleach-online.onrender.com';
+    }
+
+    // Mặc định: Chạy cùng host (chạy trực tiếp trên Render hoặc VPS)
+    const wsProto = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+    return `${wsProto}${window.location.host}`;
+}
+
 function connectWebSocketAndSend(initialMsg) {
-    const wsProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
-    const wsUrl = `${wsProtocol}${window.location.host}`;
+    const wsUrl = getWebSocketUrl();
 
     try {
         socket = new WebSocket(wsUrl);

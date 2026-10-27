@@ -365,6 +365,19 @@ const bindingListGamepad = document.getElementById('bindingListGamepad');
 const guideGridP1 = document.getElementById('guideGridP1');
 const guideGridP2 = document.getElementById('guideGridP2');
 
+// Donate Elements
+const btnHeaderDonate = document.getElementById('btnHeaderDonate');
+const btnFooterDonate = document.getElementById('btnFooterDonate');
+const btnOpenDonateModalBanner = document.getElementById('btnOpenDonateModalBanner');
+const qrPreviewTrigger = document.getElementById('qrPreviewTrigger');
+const donateModal = document.getElementById('donateModal');
+const btnCloseDonateModal = document.getElementById('btnCloseDonateModal');
+const btnCloseDonateBottom = document.getElementById('btnCloseDonateBottom');
+const btnModalCopyStk = document.getElementById('btnModalCopyStk');
+const btnModalCopyMemo = document.getElementById('btnModalCopyMemo');
+const btnCopyStkBanner = document.getElementById('btnCopyStkBanner');
+const bannerCopyStkBadge = document.getElementById('bannerCopyStkBadge');
+
 // ==========================================
 // 4. KHỞI TẠO VÀ ĐIỀU KHIỂN RUFFLE FLASH ENGINE
 // ==========================================
@@ -2062,6 +2075,99 @@ function setupVirtualControls() {
         btn.addEventListener('mouseleave', release);
         btn.addEventListener('touchstart', press, { passive: false });
         btn.addEventListener('touchend', release, { passive: false });
+    });
+}
+
+// ==========================================
+// 10B. MODAL DONATE & SAO CHÉP THÔNG TIN
+// ==========================================
+function openDonateModal() {
+    if (donateModal) {
+        donateModal.classList.remove('hidden');
+    }
+}
+
+function closeDonateModal() {
+    if (donateModal) {
+        donateModal.classList.add('hidden');
+    }
+}
+
+if (btnHeaderDonate) btnHeaderDonate.addEventListener('click', openDonateModal);
+if (btnFooterDonate) btnFooterDonate.addEventListener('click', openDonateModal);
+if (btnOpenDonateModalBanner) btnOpenDonateModalBanner.addEventListener('click', openDonateModal);
+if (qrPreviewTrigger) qrPreviewTrigger.addEventListener('click', openDonateModal);
+
+if (btnCloseDonateModal) btnCloseDonateModal.addEventListener('click', closeDonateModal);
+if (btnCloseDonateBottom) btnCloseDonateBottom.addEventListener('click', closeDonateModal);
+
+if (donateModal) {
+    donateModal.addEventListener('click', (e) => {
+        if (e.target === donateModal) {
+            closeDonateModal();
+        }
+    });
+}
+
+// Bấm phím Escape đóng modal
+window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        if (donateModal && !donateModal.classList.contains('hidden')) {
+            closeDonateModal();
+        }
+    }
+});
+
+function copyToClipboard(text, targetEl, successText, originalText) {
+    const doUpdate = () => {
+        if (targetEl) {
+            targetEl.innerText = successText;
+            setTimeout(() => {
+                targetEl.innerText = originalText;
+            }, 2000);
+        }
+    };
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(doUpdate).catch(() => {
+            fallbackCopy(text, doUpdate);
+        });
+    } else {
+        fallbackCopy(text, doUpdate);
+    }
+}
+
+function fallbackCopy(text, callback) {
+    try {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        if (callback) callback();
+    } catch (err) {
+        console.warn('Copy fallback failed:', err);
+    }
+}
+
+if (btnModalCopyStk) {
+    btnModalCopyStk.addEventListener('click', () => {
+        copyToClipboard('1072917758', btnModalCopyStk, '✓ Đã copy!', '📋 Copy STK');
+    });
+}
+
+if (btnModalCopyMemo) {
+    btnModalCopyMemo.addEventListener('click', () => {
+        copyToClipboard('BVN Donate', btnModalCopyMemo, '✓ Đã copy!', '📋 Copy Lời nhắn');
+    });
+}
+
+if (btnCopyStkBanner) {
+    btnCopyStkBanner.addEventListener('click', () => {
+        copyToClipboard('1072917758', bannerCopyStkBadge, '✓ Đã copy!', '📋 Copy');
     });
 }
 

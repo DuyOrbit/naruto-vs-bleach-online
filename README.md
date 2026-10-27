@@ -144,5 +144,28 @@ Mở trình duyệt truy cập: **`http://localhost:3000`** (hoặc qua WAMP/XAM
 
 ---
 
+## ☕ Ủng hộ tác giả (Donate)
+
+Dự án **Bleach vs Naruto Online P2P** được xây dựng và duy trì hoàn toàn miễn phí, không chèn quảng cáo nhằm mang lại trải nghiệm tuổi thơ tuyệt vời nhất cho cộng đồng game thủ.
+
+Nếu bạn yêu thích dự án và muốn mời tác giả một ly cà phê để tiếp thêm năng lượng duy trì server & phát triển thêm nhiều tính năng mới, bạn có thể ủng hộ qua mã QR hoặc thông tin ngân hàng bên dưới:
+
+<div align="center">
+  <img src="donate.jpg" width="280" alt="Mã QR Donate Vietcombank NGUYEN DUY" style="border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); margin: 12px 0;" />
+  <br/>
+
+| Thông tin ngân hàng | Chi tiết |
+| :--- | :--- |
+| **Ngân hàng** | **Vietcombank (VCB)** |
+| **Chủ tài khoản** | **NGUYEN DUY** |
+| **Số tài khoản** | `1072917758` |
+| **Nội dung CK gợi ý** | `BVN Donate` |
+
+  <p><em>Chân thành cảm ơn mọi sự đóng góp và ủng hộ quý báu từ bạn! ❤️</em></p>
+</div>
+
+---
+
 ## 📜 Giấy phép & Bản quyền
 Dự án được xây dựng cho mục đích học tập và giải trí phi thương mại. Mọi tài sản hình ảnh, âm thanh và mã nguồn gốc Flash của trò chơi *Bleach vs Naruto 2.6* thuộc về nhà phát triển gốc Jianhun (剑魂).
+

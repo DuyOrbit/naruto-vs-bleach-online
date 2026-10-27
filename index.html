@@ -37,10 +37,16 @@
                 <span class="naruto-text">NARUTO</span>
                 <span class="badge-online">ONLINE P2P</span>
             </div>
-            <div class="header-status">
-                <span class="status-indicator offline" id="statusDot"></span>
-                <span id="statusText">Chế độ Offline (Chơi đơn)</span>
-                <span class="ping-badge hidden" id="pingBadge">Ping: <strong id="pingVal">--</strong> ms</span>
+            <div class="header-actions">
+                <div class="header-status">
+                    <span class="status-indicator offline" id="statusDot"></span>
+                    <span id="statusText">Chế độ Offline (Chơi đơn)</span>
+                    <span class="ping-badge hidden" id="pingBadge">Ping: <strong id="pingVal">--</strong> ms</span>
+                </div>
+                <button id="btnHeaderDonate" class="btn-donate-header" title="Ủng hộ tác giả một ly cà phê duy trì máy chủ (Donate)">
+                    <span class="donate-icon">☕</span>
+                    <span class="donate-text">Ủng hộ (Donate)</span>
+                </button>
             </div>
         </header>
 
@@ -235,6 +241,52 @@
                     </div>
                 </div>
             </section>
+
+            <!-- KHU VỰC DONATE / ỦNG HỘ TÁC GIẢ -->
+            <section class="donate-section" id="donateSection">
+                <div class="donate-card">
+                    <div class="donate-card-badge">☕ BUY ME A COFFEE</div>
+                    <div class="donate-card-content">
+                        <div class="donate-info-col">
+                            <h3 class="donate-title">Ủng Hộ Duy Trì & Phát Triển Dự Án</h3>
+                            <p class="donate-desc">
+                                <strong>Bleach vs Naruto Online</strong> được tạo ra hoàn toàn phi lợi nhuận, không quảng cáo và miễn phí cho cộng đồng game thủ yêu thích đối kháng. Nếu dự án mang lại niềm vui cho bạn và bạn bè, bạn có thể ủng hộ tác giả một ly cà phê qua mã VietQR bên cạnh để tiếp thêm động lực duy trì server và phát triển thêm nhiều tính năng mới nhé! ❤️
+                            </p>
+                            <div class="donate-quick-info">
+                                <div class="quick-info-pill">
+                                    <span class="q-label">Ngân hàng:</span>
+                                    <span class="q-val">Vietcombank (VCB)</span>
+                                </div>
+                                <div class="quick-info-pill">
+                                    <span class="q-label">Chủ TK:</span>
+                                    <span class="q-val font-bold">NGUYEN DUY</span>
+                                </div>
+                                <div class="quick-info-pill clickable" id="btnCopyStkBanner" title="Bấm để sao chép số tài khoản">
+                                    <span class="q-label">STK:</span>
+                                    <span class="q-val stk-number">1072917758</span>
+                                    <span class="copy-badge" id="bannerCopyStkBadge">📋 Copy</span>
+                                </div>
+                            </div>
+                            <div class="donate-action-row">
+                                <button id="btnOpenDonateModalBanner" class="btn btn-donate-primary">
+                                    💖 Mở Mã QR Quét Ngân Hàng
+                                </button>
+                                <span class="donate-note-text">⚡ Quét tức thì bằng mọi App Ngân Hàng & Ví Điện Tử (VietQR / Napas 247)</span>
+                            </div>
+                        </div>
+                        <div class="donate-qr-col">
+                            <div class="qr-preview-card" id="qrPreviewTrigger" title="Nhấp để phóng to mã QR">
+                                <div class="qr-img-wrapper">
+                                    <img src="donate.jpg" alt="Mã QR Donate Vietcombank - NGUYEN DUY" class="qr-preview-image" />
+                                </div>
+                                <div class="qr-zoom-hint">
+                                    <span>🔍 Phóng to QR</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </main>
 
         <!-- MODAL CÀI ĐẶT BÀN PHÍM & TAY CẦM (CONTROLS MODAL) -->
@@ -340,8 +392,86 @@
         </div>
 
         <!-- Footer -->
+        <!-- MODAL DONATE / ỦNG HỘ TÁC GIẢ -->
+        <div id="donateModal" class="modal-backdrop hidden">
+            <div class="modal-card modal-card-donate">
+                <div class="modal-header">
+                    <h3>☕ ỦNG HỘ TÁC GIẢ (DONATE)</h3>
+                    <button id="btnCloseDonateModal" class="btn-close" title="Đóng">&times;</button>
+                </div>
+                <div class="modal-body donate-modal-body">
+                    <div class="donate-modal-intro">
+                        <p>
+                            Cảm ơn bạn đã đồng hành và trải nghiệm <strong>Bleach vs Naruto Online P2P</strong>! Mọi sự đóng góp của bạn dù nhỏ nhất đều là nguồn động viên to lớn để mình tiếp tục hoàn thiện và phát triển dự án.
+                        </p>
+                    </div>
+
+                    <div class="donate-modal-grid">
+                        <div class="donate-modal-qr-col">
+                            <div class="modal-qr-frame">
+                                <img src="donate.jpg" alt="Mã QR Vietcombank - NGUYEN DUY" class="modal-qr-img" />
+                            </div>
+                            <a href="donate.jpg" download="QR_Donate_NguyenDuy_Vietcombank.jpg" class="btn btn-secondary btn-sm btn-download-qr" title="Lưu mã QR về điện thoại hoặc máy tính">
+                                📥 Tải ảnh mã QR
+                            </a>
+                        </div>
+                        <div class="donate-modal-info-col">
+                            <div class="bank-info-table">
+                                <div class="bank-info-row">
+                                    <span class="info-row-label">Ngân hàng:</span>
+                                    <div class="info-row-val">
+                                        <span class="bank-pill">Vietcombank</span>
+                                    </div>
+                                </div>
+                                <div class="bank-info-row">
+                                    <span class="info-row-label">Chủ tài khoản:</span>
+                                    <div class="info-row-val font-bold">
+                                        NGUYEN DUY
+                                    </div>
+                                </div>
+                                <div class="bank-info-row">
+                                    <span class="info-row-label">Số tài khoản:</span>
+                                    <div class="info-row-copy">
+                                        <span class="stk-display" id="modalStkDisplay">1072917758</span>
+                                        <button id="btnModalCopyStk" class="btn btn-sm btn-copy-inline" title="Sao chép số tài khoản">
+                                            📋 Copy STK
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="bank-info-row">
+                                    <span class="info-row-label">Nội dung CK:</span>
+                                    <div class="info-row-copy">
+                                        <span class="memo-display" id="modalMemoDisplay">BVN Donate</span>
+                                        <button id="btnModalCopyMemo" class="btn btn-sm btn-copy-inline" title="Sao chép nội dung">
+                                            📋 Copy Lời nhắn
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="donate-thanks-box">
+                                <span class="thanks-icon">💖</span>
+                                <p class="thanks-text">
+                                    <strong>Lời nhắn gửi:</strong> Cảm ơn tất cả anh em game thủ đã ủng hộ. Chúc bạn có những giờ phút so tài đối kháng thật mãn nhãn và bùng nổ!
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer modal-footer-donate">
+                    <button id="btnCloseDonateBottom" class="btn btn-secondary">Đóng cửa sổ</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
         <footer class="footer">
-            <p>Bleach vs Naruto P2P Input Sync Edition • 1080p Native • Zero Bandwidth Video • Không Lưu Dữ Liệu</p>
+            <div class="footer-inner">
+                <p>Bleach vs Naruto P2P Input Sync Edition • 1080p Native • Zero Bandwidth Video • Không Lưu Dữ Liệu</p>
+                <button id="btnFooterDonate" class="btn-footer-donate" title="Ủng hộ tác giả một ly cà phê (Donate)">
+                    ☕ Ủng hộ tác giả (Donate)
+                </button>
+            </div>
         </footer>
     </div>
 

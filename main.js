@@ -36,10 +36,44 @@ const PEER_CONFIG = {
         iceServers: [
             { urls: 'stun:stun.l.google.com:19302' },
             { urls: 'stun:stun1.l.google.com:19302' },
+            { urls: 'stun:stun2.l.google.com:19302' },
+            { urls: 'stun:stun3.l.google.com:19302' },
+            { urls: 'stun:stun.cloudflare.com:3478' },
             { urls: 'stun:global.stun.twilio.com:3478' }
-        ]
+        ],
+        iceCandidatePoolSize: 10
     }
 };
+
+// ==========================================
+// CẤU HÌNH CHẤT LƯỢNG STREAM 60FPS
+// ==========================================
+const STREAM_QUALITY_PRESETS = {
+    smooth: {
+        label: '⚡ Siêu mượt 60FPS (Khuyên dùng)',
+        maxBitrate: 3500000, // 3.5 Mbps: Cực nhẹ cho mạng, giữ vững 60 FPS
+        maxKbps: 3500,
+        framerate: 60,
+        degradationPreference: 'maintain-framerate'
+    },
+    balanced: {
+        label: '💎 Cân bằng HD 60FPS',
+        maxBitrate: 5500000, // 5.5 Mbps: Nét đẹp chuẩn HD
+        maxKbps: 5500,
+        framerate: 60,
+        degradationPreference: 'maintain-framerate'
+    },
+    ultra: {
+        label: '👑 Siêu nét 1080p',
+        maxBitrate: 9000000, // 9.0 Mbps: Cho mạng LAN / cáp quang mạnh
+        maxKbps: 9000,
+        framerate: 60,
+        degradationPreference: 'maintain-framerate'
+    }
+};
+
+let currentStreamQuality = localStorage.getItem('bvn_stream_quality') || 'smooth';
+let activeVideoSender = null;
 
 // ==========================================
 // 1. ĐỊNH NGHĨA PHÍM GỐC CỦA FLASH BVN 2.6
@@ -335,6 +369,7 @@ const guestConnectionMsg = document.getElementById('guestConnectionMsg');
 const btnSyncRestart = document.getElementById('btnSyncRestart');
 const btnFullscreen = document.getElementById('btnFullscreen');
 const btnShareScreen = document.getElementById('btnShareScreen');
+const streamQualitySelect = document.getElementById('streamQualitySelect');
 const btnOpenKeyModal = document.getElementById('btnOpenKeyModal');
 
 // Modal Elements
@@ -402,9 +437,17 @@ function focusGame() {
 
 function pauseLocalRuffle() {
     try {
-        if (rufflePlayer && typeof rufflePlayer.pause === 'function') {
-            rufflePlayer.pause();
+        setLocalRufflePaused(true);
+        if (rufflePlayer) {
+            const api = typeof rufflePlayer.ruffle === 'function' ? rufflePlayer.ruffle(1) : rufflePlayer;
+            if (api) {
+                if (typeof api.suspend === 'function') api.suspend();
+                if (typeof api.pause === 'function') api.pause();
+                if ('volume' in api) api.volume = 0;
+            }
         }
+        const rPlayer = document.getElementById('rufflePlayer');
+        if (rPlayer) rPlayer.style.display = 'none';
     } catch (e) {
         console.warn("Không thể pause local ruffle:", e);
     }
@@ -546,8 +589,12 @@ function dispatchFlashKeyEvent(type, flashKeyInfo) {
 // 5. WEBRTC 60FPS HD CANVAS STREAMING ENGINE
 // ==========================================
 
-// Tăng bitrate SDP lên 20 Mbps cho chất lượng 1080p 60fps nét căng
-function boostSdpBitrate(sdp, maxKbps = 20000) {
+// Tối ưu bitrate SDP theo preset được chọn (mặc định ~3.5 - 5.5 Mbps cực kỳ mượt mà)
+function boostSdpBitrate(sdp, maxKbps) {
+    if (!maxKbps) {
+        const preset = STREAM_QUALITY_PRESETS[currentStreamQuality] || STREAM_QUALITY_PRESETS.smooth;
+        maxKbps = preset.maxKbps;
+    }
     let lines = sdp.split('\r\n');
     let mVideoIndex = lines.findIndex(l => l.startsWith('m=video'));
     if (mVideoIndex !== -1) {
@@ -588,8 +635,8 @@ async function setupHostWebRtc() {
             const videoTrack = canvasStream.getVideoTracks()[0];
             if (videoTrack) {
                 if ('contentHint' in videoTrack) {
-                    // 'detail': Tối ưu giữ nét tối đa cho chữ và đường viền nhân vật 2D, không bị nén mờ
-                    videoTrack.contentHint = 'detail';
+                    // 'motion': Tối ưu chuyển động mượt mà 60 FPS độ trễ thấp cho game đối kháng
+                    videoTrack.contentHint = 'motion';
                 }
             }
 
@@ -606,7 +653,10 @@ async function setupHostWebRtc() {
 
             outgoingStream.getTracks().forEach(track => {
                 const sender = peerConnection.addTrack(track, outgoingStream);
-                if (track.kind === 'video') videoSender = sender;
+                if (track.kind === 'video') {
+                    videoSender = sender;
+                    activeVideoSender = sender;
+                }
                 console.log(`Host: Đã thêm ${track.kind} Track 60FPS vào WebRTC.`);
             });
         } catch (e) {
@@ -628,14 +678,15 @@ async function setupHostWebRtc() {
     peerConnection.onconnectionstatechange = () => {
         console.log("Host PeerConnection state:", peerConnection.connectionState);
         if (peerConnection.connectionState === 'connected') {
-            showSyncNotification("🟢 Đã truyền hình ảnh 60FPS HD Siêu Nét và Âm thanh cho Khách!");
+            const preset = STREAM_QUALITY_PRESETS[currentStreamQuality] || STREAM_QUALITY_PRESETS.smooth;
+            showSyncNotification(`🟢 Đã kết nối P2P 60FPS mượt mà (${preset.label}) cho Khách!`);
         }
     };
 
     // Tạo Offer
     try {
         const offer = await peerConnection.createOffer();
-        const boostedSdp = boostSdpBitrate(offer.sdp, 20000);
+        const boostedSdp = boostSdpBitrate(offer.sdp);
         await peerConnection.setLocalDescription({ type: 'offer', sdp: boostedSdp });
         sendNetworkMessage({
             type: 'webrtc_offer',
@@ -647,21 +698,24 @@ async function setupHostWebRtc() {
     }
 }
 
-// Cấu hình bộ mã hóa video: GIỮ NGUYÊN 100% ĐỘ PHÂN GIẢI NATIVE (không bao giờ downscale),
-// luôn giữ 60 FPS và Bitrate 20Mbps cho hình ảnh nét căng
+// Cấu hình bộ mã hóa video: duy trì 60 FPS mượt mà tuyệt đối (maintain-framerate),
+// tối ưu bitrate linh hoạt theo preset để không bao giờ bị nghẽn mạng
 async function tuneVideoSenderForLowLatency(sender) {
+    if (!sender) return;
     try {
+        const preset = STREAM_QUALITY_PRESETS[currentStreamQuality] || STREAM_QUALITY_PRESETS.smooth;
         const params = sender.getParameters();
         if (!params.encodings || params.encodings.length === 0) params.encodings = [{}];
         // Không hạ độ phân giải (scale = 1.0)
         params.encodings[0].scaleResolutionDownBy = 1.0;
-        params.encodings[0].maxFramerate = 60;
-        params.encodings[0].maxBitrate = 20000000; // 20 Mbps cho đồ họa 1080p sắc nét 100%
+        params.encodings[0].maxFramerate = preset.framerate;
+        params.encodings[0].maxBitrate = preset.maxBitrate;
         params.encodings[0].priority = 'high';
         params.encodings[0].networkPriority = 'high';
-        params.degradationPreference = 'maintain-resolution'; // Giữ nguyên độ sắc nét
+        // QUAN TRỌNG: maintain-framerate để LUÔN GIỮ 60 FPS, không bao giờ được phép drop khung hình!
+        params.degradationPreference = preset.degradationPreference;
         await sender.setParameters(params);
-        console.log(`Host: Encoder 60FPS HD: giữ nguyên 100% resolution, 20Mbps bitrate`);
+        console.log(`Host: Encoder tuned: 60FPS maintain-framerate, maxBitrate: ${preset.maxBitrate / 1000}kbps`);
     } catch (e) {
         console.warn("Không thể tinh chỉnh encoder:", e);
     }
@@ -811,7 +865,7 @@ async function handleWebRtcOffer(sdp) {
         await peerConnection.setRemoteDescription(new RTCSessionDescription({ type: 'offer', sdp }));
         await flushPendingIceCandidates();
         const answer = await peerConnection.createAnswer();
-        const boostedSdp = boostSdpBitrate(answer.sdp, 20000);
+        const boostedSdp = boostSdpBitrate(answer.sdp);
         await peerConnection.setLocalDescription({ type: 'answer', sdp: boostedSdp });
         sendNetworkMessage({
             type: 'webrtc_answer',
@@ -1288,7 +1342,7 @@ function updateRoleDisplay(role) {
     }
 }
 
-// Nút chia sẻ trực tiếp Tab 1080p 60FPS siêu nét cho Khách bằng phần cứng
+// Nút chia sẻ trực tiếp Tab 60FPS siêu mượt cho Khách bằng phần cứng GPU
 if (btnShareScreen) {
     btnShareScreen.addEventListener('click', async () => {
         try {
@@ -1303,17 +1357,21 @@ if (btnShareScreen) {
             });
             const newVideoTrack = stream.getVideoTracks()[0];
             if (newVideoTrack && peerConnection) {
+                if ('contentHint' in newVideoTrack) {
+                    newVideoTrack.contentHint = 'motion';
+                }
                 const senders = peerConnection.getSenders();
                 const videoSender = senders.find(s => s.track && s.track.kind === 'video');
                 if (videoSender) {
+                    activeVideoSender = videoSender;
                     await videoSender.replaceTrack(newVideoTrack);
                     tuneVideoSenderForLowLatency(videoSender);
-                    btnShareScreen.innerText = "✓ Đang phát Tab 1080p 60FPS";
+                    btnShareScreen.innerText = "✓ Đang phát Tab 60FPS GPU";
                     btnShareScreen.style.background = "#00ff88";
                     btnShareScreen.style.color = "#000";
-                    showSyncNotification("🟢 Đã kích hoạt truyền hình ảnh Tab 1080p 60FPS siêu nét cho Khách!");
+                    showSyncNotification("🟢 Đã kích hoạt truyền hình ảnh Tab 60FPS GPU phần cứng siêu mượt cho Khách!");
                     newVideoTrack.onended = () => {
-                        btnShareScreen.innerText = "📺 Bật Tab 1080p 60FPS";
+                        btnShareScreen.innerText = "📺 Bật Tab 60FPS GPU";
                         btnShareScreen.style.background = "";
                         btnShareScreen.style.color = "";
                     };
@@ -1322,6 +1380,20 @@ if (btnShareScreen) {
         } catch (e) {
             console.warn("Screen share cancelled or failed:", e);
         }
+    });
+}
+
+// Bắt sự kiện đổi chất lượng truyền tải trực tiếp
+if (streamQualitySelect) {
+    streamQualitySelect.value = currentStreamQuality;
+    streamQualitySelect.addEventListener('change', async (e) => {
+        currentStreamQuality = e.target.value;
+        localStorage.setItem('bvn_stream_quality', currentStreamQuality);
+        const preset = STREAM_QUALITY_PRESETS[currentStreamQuality] || STREAM_QUALITY_PRESETS.smooth;
+        if (activeVideoSender) {
+            await tuneVideoSenderForLowLatency(activeVideoSender);
+        }
+        showSyncNotification(`🟢 Đã đổi chất lượng stream: ${preset.label}`);
     });
 }
 

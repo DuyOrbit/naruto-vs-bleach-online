@@ -66,8 +66,16 @@
                     </button>
                 </div>
                 <div class="toolbar-right">
-                    <button id="btnShareScreen" class="btn btn-primary btn-sm btn-screen-share hidden" title="Chia sẻ Tab Game 1080p 60FPS bằng phần cứng siêu nét cho Khách">
-                        📺 Bật Tab 1080p 60FPS
+                    <div class="stream-quality-wrapper" id="streamQualityWrapper" title="Tùy chỉnh tốc độ truyền và độ mượt 60FPS cho Khách">
+                        <label for="streamQualitySelect" class="stream-quality-label">⚡ Stream:</label>
+                        <select id="streamQualitySelect" class="stream-quality-select">
+                            <option value="smooth">⚡ Siêu mượt 60FPS (Khuyên dùng)</option>
+                            <option value="balanced">💎 Cân bằng HD 60FPS</option>
+                            <option value="ultra">👑 Siêu nét 1080p</option>
+                        </select>
+                    </div>
+                    <button id="btnShareScreen" class="btn btn-primary btn-sm btn-screen-share hidden" title="Chia sẻ Tab Game 60FPS bằng card đồ họa GPU siêu mượt cho Khách">
+                        📺 Bật Tab 60FPS GPU
                     </button>
                     <button id="btnOpenKeyModal" class="btn btn-secondary btn-sm" title="Tùy chỉnh phím bấm cho P1, P2 và Tay cầm Gamepad">
                         ⚙️ Cài đặt phím & Tay cầm

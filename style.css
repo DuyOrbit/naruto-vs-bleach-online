@@ -387,14 +387,54 @@ body {
     height: 100%;
     object-fit: contain;
     background: #000;
-    image-rendering: -webkit-optimize-contrast;
-    image-rendering: crisp-edges;
-    image-rendering: pixelated;
     display: block;
+    transform: translateZ(0);
+    will-change: transform;
 }
 
 #remoteVideo.hidden {
     display: none;
+}
+
+/* Bộ chọn chất lượng stream */
+.stream-quality-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    padding: 3px 8px;
+    border-radius: 6px;
+    transition: border-color 0.2s ease;
+}
+
+.stream-quality-wrapper:hover {
+    border-color: rgba(0, 210, 255, 0.45);
+}
+
+.stream-quality-label {
+    font-size: 0.78rem;
+    font-family: var(--font-heading);
+    color: #ffaa00;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.stream-quality-select {
+    background: transparent;
+    color: var(--text-primary);
+    border: none;
+    font-family: var(--font-body);
+    font-size: 0.84rem;
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+    padding: 2px 2px;
+}
+
+.stream-quality-select option {
+    background: var(--bg-panel);
+    color: #fff;
 }
 
 .loading-overlay {

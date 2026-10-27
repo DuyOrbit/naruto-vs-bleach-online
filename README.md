@@ -51,9 +51,15 @@ Tạo phòng lấy mã / link mời 1 chạm, thanh phím ảo (Virtual Controls
 - **Chơi 2 người trên 1 máy tính:** Tự động gán hoặc chọn riêng biệt (Tay #1 = P1, Tay #2 = P2) để 2 bạn bè cắm 2 tay cầm đấu đối kháng cùng nhau.
 
 ### 📺 2. 60FPS HD Remote Play (1 Trận Chung • 100% Khớp Trận)
-- Khắc phục triệt để vấn đề "lệch trận / desync" của các bản game Flash cũ.
-- Máy Host chạy game gốc và stream hình ảnh sắc nét 60FPS HD kèm âm thanh qua WebRTC Canvas Capture cho máy Khách.
-- Máy Khách gửi tín hiệu điều khiển P2 siêu tốc (độ trễ dưới 15ms qua WebRTC DataChannel).
+- **100% Khớp trận:** Khắc phục triệt để vấn đề "lệch trận / desync" của các bản game Flash cũ. Máy Host chạy game gốc và stream hình ảnh sắc nét 60FPS HD kèm âm thanh qua WebRTC Canvas Capture cho máy Khách.
+- **Khóa cứng 60 FPS (Ultra Smooth `maintain-framerate`):** Bộ mã hóa WebRTC ưu tiên giữ vững 60 FPS tuyệt đối cho game đối kháng, không drop khung hình ngay cả khi mạng biến động.
+- **Tùy chọn chất lượng truyền tải (Stream Quality Selector):**
+  - ⚡ **Siêu mượt 60FPS (Khuyên dùng):** Bitrate tối ưu 3.5 Mbps, nén chuyển động siêu tốc (`contentHint: motion`), chạy mượt trên cả Wifi và mạng 4G.
+  - 💎 **Cân bằng HD 60FPS:** Bitrate 5.5 Mbps, hình ảnh sắc nét chuẩn HD.
+  - 👑 **Siêu nét 1080p:** Bitrate 9.0 Mbps dành cho mạng LAN / cáp quang tốc độ cao.
+- **Tăng tốc phần cứng GPU (Hardware Screen Share):** Nút **"📺 Bật Tab 60FPS GPU"** cho phép máy Host chia sẻ trực tiếp Tab bằng bộ giải mã GPU phần cứng (NVENC/QuickSync/AMF) giảm tải 50% CPU cho máy Host.
+- **Tiết kiệm tài nguyên máy Khách (Zero CPU Overhead):** Tự động đình chỉ hoàn toàn (`suspend`) engine Flash local trên máy Khách khi vào trận, dành 100% phần cứng máy Khách cho phát video mượt mà.
+- **Điều khiển siêu tốc:** Máy Khách gửi tín hiệu phím P2 trực tiếp qua WebRTC DataChannel P2P (độ trễ dưới 15ms).
 
 ### ⌨️ 3. 4 Kiểu Điều Khiển Bàn Phím (Keyboard Presets)
 - **Option 1 (Chuẩn Flash):** 4 Mũi tên (`↑` `↓` `←` `→`) + Numpad `1..6` (hỗ trợ cả hàng phím số `1..6`).

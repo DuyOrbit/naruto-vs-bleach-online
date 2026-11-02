@@ -390,6 +390,16 @@ body {
     display: block;
     transform: translateZ(0);
     will-change: transform;
+    /* Khử mờ nội suy, giữ nét viền nhân vật và chiêu thức Flash anime */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    image-rendering: pixelated;
+}
+
+#rufflePlayer canvas {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    image-rendering: pixelated;
 }
 
 #remoteVideo.hidden {

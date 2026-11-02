@@ -636,15 +636,62 @@ function boostSdpBitrate(sdp, maxKbps) {
         const preset = STREAM_QUALITY_PRESETS[currentStreamQuality] || STREAM_QUALITY_PRESETS.smooth;
         maxKbps = preset.maxKbps;
     }
+    const minKbps = Math.min(2500, Math.floor(maxKbps * 0.6));
+    const startKbps = Math.min(4500, maxKbps);
+
     let lines = sdp.split('\r\n');
     let mVideoIndex = lines.findIndex(l => l.startsWith('m=video'));
     if (mVideoIndex !== -1) {
         lines.splice(mVideoIndex + 1, 0, `b=AS:${maxKbps}`, `b=TIAS:${maxKbps * 1000}`);
     }
+
+    // Bơm min-bitrate và start-bitrate: Vào trận nét căng ngay lập tức, không đợi thăm dò
+    lines = lines.map(line => {
+        if (line.startsWith('a=fmtp:') && (line.includes('packetization-mode') || line.includes('profile-level-id') || line.includes('apt='))) {
+            if (!line.includes('x-google-min-bitrate')) {
+                return `${line};x-google-min-bitrate=${minKbps};x-google-start-bitrate=${startKbps};x-google-max-bitrate=${maxKbps}`;
+            }
+        }
+        return line;
+    });
+
     return lines.join('\r\n');
 }
 
 // HOST: Bắt hình từ Canvas và truyền qua WebRTC cho Guest
+
+// Ưu tiên Codec H.264 tăng tốc phần cứng (GPU Hardware Acceleration)
+// Giúp giảm độ trễ nén video xuống dưới 5ms và chống vỡ hạt chiêu thức
+function preferH264Codec(pc) {
+    if (!pc || !('getTransceivers' in pc)) return;
+    try {
+        const transceivers = pc.getTransceivers();
+        for (const transceiver of transceivers) {
+            const kind = transceiver.sender?.track?.kind || transceiver.receiver?.track?.kind;
+            if (kind === 'video' && typeof transceiver.setCodecPreferences === 'function') {
+                const capabilities = RTCRtpReceiver.getCapabilities ? RTCRtpReceiver.getCapabilities('video') : null;
+                if (capabilities && capabilities.codecs) {
+                    const h264Codecs = [];
+                    const otherCodecs = [];
+                    for (const codec of capabilities.codecs) {
+                        if (codec.mimeType.toLowerCase() === 'video/h264') {
+                            h264Codecs.push(codec);
+                        } else {
+                            otherCodecs.push(codec);
+                        }
+                    }
+                    if (h264Codecs.length > 0) {
+                        transceiver.setCodecPreferences([...h264Codecs, ...otherCodecs]);
+                        console.log("WebRTC: Đã kích hoạt phần cứng GPU H.264 cho video stream!");
+                    }
+                }
+            }
+        }
+    } catch (e) {
+        console.warn("Không thể đặt ưu tiên H.264:", e);
+    }
+}
+
 async function setupHostWebRtc() {
     console.log("Khởi động WebRTC Host Stream...");
     if (peerConnection) {
@@ -656,7 +703,7 @@ async function setupHostWebRtc() {
     pendingIceCandidates = [];
 
     // Kênh dữ liệu P2P trực tiếp cho phím bấm (không vòng qua server WebSocket)
-    setupInputChannel(peerConnection.createDataChannel('bvn-input', { ordered: true }));
+    setupInputChannel(peerConnection.createDataChannel('bvn-input', { ordered: true, maxPacketLifeTime: 50 }));
     let videoSender = null;
 
     // Chờ canvas sẵn sàng
@@ -726,6 +773,7 @@ async function setupHostWebRtc() {
 
     // Tạo Offer
     try {
+        preferH264Codec(peerConnection);
         const offer = await peerConnection.createOffer();
         const boostedSdp = boostSdpBitrate(offer.sdp);
         await peerConnection.setLocalDescription({ type: 'offer', sdp: boostedSdp });
@@ -905,6 +953,7 @@ async function handleWebRtcOffer(sdp) {
     try {
         await peerConnection.setRemoteDescription(new RTCSessionDescription({ type: 'offer', sdp }));
         await flushPendingIceCandidates();
+        preferH264Codec(peerConnection);
         const answer = await peerConnection.createAnswer();
         const boostedSdp = boostSdpBitrate(answer.sdp);
         await peerConnection.setLocalDescription({ type: 'answer', sdp: boostedSdp });

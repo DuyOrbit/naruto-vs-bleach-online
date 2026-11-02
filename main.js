@@ -34,14 +34,16 @@
 const PEER_CONFIG = {
     config: {
         iceServers: [
+            // Cloudflare STUN có máy chủ đặt tại Việt Nam (Hà Nội & TP.HCM), ping cực thấp
+            { urls: 'stun:stun.cloudflare.com:3478' },
             { urls: 'stun:stun.l.google.com:19302' },
             { urls: 'stun:stun1.l.google.com:19302' },
             { urls: 'stun:stun2.l.google.com:19302' },
-            { urls: 'stun:stun3.l.google.com:19302' },
-            { urls: 'stun:stun.cloudflare.com:3478' },
             { urls: 'stun:global.stun.twilio.com:3478' }
         ],
-        iceCandidatePoolSize: 10
+        iceCandidatePoolSize: 10,
+        bundlePolicy: 'max-bundle', // Gom toàn bộ Audio/Video/Input vào 1 kết nối UDP duy nhất để giảm jitter và độ trễ
+        rtcpMuxPolicy: 'require'
     }
 };
 
@@ -516,6 +518,7 @@ async function initRuffleGame() {
             letterbox: "on",
             forceScale: true,
             quality: "high",
+            preferredRenderer: "webgl",
             autoplay: "on",
             unmuteOverlay: "hidden",
             splashScreen: false,
@@ -703,7 +706,7 @@ async function setupHostWebRtc() {
     pendingIceCandidates = [];
 
     // Kênh dữ liệu P2P trực tiếp cho phím bấm (không vòng qua server WebSocket)
-    setupInputChannel(peerConnection.createDataChannel('bvn-input', { ordered: true, maxPacketLifeTime: 50 }));
+    setupInputChannel(peerConnection.createDataChannel('bvn-input', { ordered: false, maxRetransmits: 0 }));
     let videoSender = null;
 
     // Chờ canvas sẵn sàng
@@ -897,6 +900,8 @@ function setupGuestWebRtc() {
 
     if (remoteVideo) {
         remoteVideo.setAttribute('tabindex', '0');
+        remoteVideo.playsInline = true;
+        if ('disableRemotePlayback' in remoteVideo) remoteVideo.disableRemotePlayback = true;
         remoteVideo.addEventListener('click', () => remoteVideo.focus());
     }
 

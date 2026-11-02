@@ -11,7 +11,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
     
     <!-- PeerJS (WebRTC P2P) -->
-    <script src="ruffle/peerjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+    <script>window.Peer || document.write('<script src="ruffle/peerjs.min.js"><\/script>')</script>
     
     <!-- Cấu hình Ruffle trước khi tải thư viện -->
     <script>
@@ -25,7 +26,9 @@
         };
     </script>
     <!-- Ruffle (Flash Emulator WebAssembly) -->
-    <script src="ruffle/ruffle.js"></script>
+    <!-- Ruffle (Flash Emulator WebAssembly): Nạp từ CDN Cloudflare/unpkg tiết kiệm ~30MB băng thông máy chủ, fallback về local nếu offline -->
+    <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
+    <script>window.RufflePlayer && window.RufflePlayer.newest || document.write('<script src="ruffle/ruffle.js"><\/script>')</script>
 </head>
 <body>
     <div class="app-container">

@@ -453,6 +453,46 @@ function pauseLocalRuffle() {
     }
 }
 
+
+// ==========================================
+// TỐI ƯU HÓA BĂNG THÔNG CHO MÁY CHỦ
+// Tải game.swf từ CDN jsDelivr + Lưu vào Cache Storage máy người chơi
+// ==========================================
+const GAME_SWF_CDN_URL = "https://cdn.jsdelivr.net/gh/DuyOrbit/naruto-vs-bleach-online@main/game.swf";
+const GAME_SWF_LOCAL_URL = "game.swf";
+
+async function getGameSwfUrl() {
+    const CACHE_NAME = 'bvn-game-cache-v1';
+    if ('caches' in window) {
+        try {
+            const cache = await caches.open(CACHE_NAME);
+            const cachedResponse = await cache.match(GAME_SWF_LOCAL_URL);
+            if (cachedResponse) {
+                console.log("[BVN Cache] Nạp game.swf từ bộ nhớ đệm máy người chơi (0 MB băng thông máy chủ)!");
+                const blob = await cachedResponse.blob();
+                return URL.createObjectURL(blob);
+            }
+
+            console.log("[BVN CDN] Đang nạp game.swf từ CDN miễn phí jsDelivr...");
+            try {
+                const response = await fetch(GAME_SWF_CDN_URL);
+                if (response.ok) {
+                    const clonedRes = response.clone();
+                    cache.put(GAME_SWF_LOCAL_URL, clonedRes).catch(() => {});
+                    const blob = await response.blob();
+                    console.log("[BVN CDN] Nạp thành công game.swf từ CDN và đã lưu Cache vĩnh viễn!");
+                    return URL.createObjectURL(blob);
+                }
+            } catch (cdnErr) {
+                console.warn("[BVN CDN] Lỗi CDN, chuyển sang fallback nội bộ:", cdnErr);
+            }
+        } catch (e) {
+            console.warn("[BVN Cache] Lỗi Cache Storage:", e);
+        }
+    }
+    return GAME_SWF_LOCAL_URL;
+}
+
 async function initRuffleGame() {
     try {
         const ruffle = window.RufflePlayer ? window.RufflePlayer.newest() : null;
@@ -495,8 +535,9 @@ async function initRuffleGame() {
         if (btnSkipIntro) btnSkipIntro.onclick = hideIntroOverlay;
         loadingOverlay.onclick = hideIntroOverlay;
 
+        const swfUrl = await getGameSwfUrl();
         rufflePlayer.load({
-            url: "game.swf",
+            url: swfUrl,
             autoplay: "on"
         }).then(() => {
             console.log("Game Flash đã nạp thành công trên Host!");

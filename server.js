@@ -1,19 +1,22 @@
 const http = require('http');
 const express = require('express');
-const path = require('path');
 const compression = require('compression');
+const path = require('path');
 const { WebSocketServer } = require('ws');
 
 const app = express();
-const server = http.createServer(app);
-const wss = new WebSocketServer({ server });
-const PORT = process.env.PORT || 3000;
 
-// 1. Bật nén phản hồi (Gzip / Brotli) cho HTML, CSS, JS, JSON
+// 1. Kích hoạt nén Gzip / Deflate: giảm 60 - 75% băng thông cho JS, CSS, JSON, HTML
+// BỎ QUA file .swf vì game.swf vốn đã được nén zlib sẵn.
+// Tránh quá tải 100% CPU và tràn RAM khi nhiều người cùng tải.
 app.use(compression({
+    threshold: 1024,
     level: 6,
     filter: (req, res) => {
         if (req.headers['x-no-compression']) return false;
+        if (req.path && req.path.endsWith('.swf')) {
+            return false;
+        }
         return compression.filter(req, res);
     }
 }));
@@ -29,31 +32,67 @@ app.use((req, res, next) => {
     next();
 });
 
-// 3. Endpoint Health Check siêu nhẹ (cho UptimeRobot hoặc kiểm tra trạng thái mà không tải 77MB web)
-app.get('/health', (req, res) => {
-    res.json({
+const server = http.createServer(app);
+const wss = new WebSocketServer({ server });
+const PORT = process.env.PORT || 3000;
+
+// Rooms storage: roomId -> { host: ws, guest: ws, lastActive: number, createdAt: number }
+const rooms = new Map();
+
+// 3. Healthcheck endpoints (hỗ trợ cả Render, UptimeRobot lẫn Fly.io)
+function getHealthData() {
+    return {
         status: 'ok',
         uptime: Math.round(process.uptime()),
         rooms: rooms.size,
         activeWsClients: wss.clients.size,
         memoryUsageMB: Math.round(process.memoryUsage().rss / 1024 / 1024)
-    });
-});
-
-// Rooms storage: roomId -> { host: ws, guest: ws, lastActive: number }
-const rooms = new Map();
-
-// 4. WebSocket Heartbeat & Quản lý kết nối để chống rò rỉ RAM (Anti-Memory Leak)
-function heartbeat() {
-    this.isAlive = true;
+    };
 }
+app.get('/health', (req, res) => res.json(getHealthData()));
+app.get('/healthz', (req, res) => res.json(getHealthData()));
+
+// 4. WebSocket Heartbeat: Giữ kết nối qua Proxy (chống timeout 60s) & dọn socket chết
+const HEARTBEAT_INTERVAL = 30000; // 30s
+const cleanupInterval = setInterval(() => {
+    // A. Kiểm tra liveness của client
+    wss.clients.forEach((ws) => {
+        if (ws.isAlive === false) {
+            return ws.terminate();
+        }
+        ws.isAlive = false;
+        try {
+            ws.ping();
+        } catch (e) {
+            ws.terminate();
+        }
+    });
+
+    // B. Dọn dẹp các phòng mồ côi hoặc treo quá 2 tiếng để chống rò rỉ bộ nhớ (Memory Leak)
+    const now = Date.now();
+    for (const [roomId, room] of rooms.entries()) {
+        const isHostAlive = room.host && room.host.readyState === 1; // 1 = OPEN
+        const isGuestAlive = room.guest && room.guest.readyState === 1;
+        if (!isHostAlive && !isGuestAlive) {
+            rooms.delete(roomId);
+        } else if (now - (room.lastActive || room.createdAt || 0) > 2 * 60 * 60 * 1000) {
+            rooms.delete(roomId);
+        }
+    }
+}, HEARTBEAT_INTERVAL);
 
 wss.on('connection', (ws) => {
     ws.isAlive = true;
-    ws.on('pong', heartbeat);
-
     let currentRoom = null;
     let currentRole = null;
+
+    ws.on('pong', () => {
+        ws.isAlive = true;
+    });
+
+    ws.on('error', (err) => {
+        console.warn('Lỗi socket client:', err.message);
+    });
 
     ws.on('message', (message) => {
         try {
@@ -61,7 +100,7 @@ wss.on('connection', (ws) => {
 
             if (data.type === 'create_room') {
                 const roomId = data.roomId;
-                rooms.set(roomId, { host: ws, guest: null, lastActive: Date.now() });
+                rooms.set(roomId, { host: ws, guest: null, lastActive: Date.now(), createdAt: Date.now() });
                 currentRoom = roomId;
                 currentRole = 'host';
                 ws.send(JSON.stringify({ type: 'room_created', roomId }));
@@ -91,7 +130,7 @@ wss.on('connection', (ws) => {
                 }
             }
             else {
-                // Relay các gói tin (game_input, sync_restart, ping, pong, webrtc_offer, webrtc_answer, webrtc_candidate)
+                // Relay các gói tin (game_input, sync_restart, ping, pong, v.v.) sang đối thủ
                 if (currentRoom) {
                     const room = rooms.get(currentRoom);
                     if (room) {
@@ -114,58 +153,30 @@ wss.on('connection', (ws) => {
             if (room) {
                 const target = currentRole === 'host' ? room.guest : room.host;
                 if (target && target.readyState === ws.OPEN) {
-                    target.send(JSON.stringify({ type: 'peer_disconnected' }));
+                    try {
+                        target.send(JSON.stringify({ type: 'peer_disconnected' }));
+                    } catch (e) {}
                 }
                 if (currentRole === 'host') {
                     rooms.delete(currentRoom);
                 } else if (room.guest === ws) {
                     room.guest = null;
+                    if (!room.host || room.host.readyState !== ws.OPEN) {
+                        rooms.delete(currentRoom);
+                    }
                 }
             }
         }
     });
-
-    ws.on('error', (err) => {
-        console.warn('WS Client error:', err.message);
-    });
 });
 
-// Định kỳ 30 giây dọn dẹp các kết nối WebSocket bị treo (zombie) và phòng chết để giải phóng RAM
-const cleanupInterval = setInterval(() => {
-    // 1. Kiểm tra liveness của client
-    wss.clients.forEach((ws) => {
-        if (ws.isAlive === false) {
-            return ws.terminate();
-        }
-        ws.isAlive = false;
-        ws.ping();
-    });
-
-    // 2. Dọn các phòng không còn ai hoạt động
-    const now = Date.now();
-    for (const [roomId, room] of rooms.entries()) {
-        const hostAlive = room.host && room.host.readyState === 1; // 1 = OPEN
-        const guestAlive = room.guest && room.guest.readyState === 1;
-        if (!hostAlive && !guestAlive) {
-            rooms.delete(roomId);
-        } else if (now - (room.lastActive || 0) > 2 * 60 * 60 * 1000) {
-            // Xóa phòng treo quá 2 tiếng
-            rooms.delete(roomId);
-        }
-    }
-}, 30000);
-
-wss.on('close', () => {
-    clearInterval(cleanupInterval);
-});
-
-// 5. Phục vụ các file tĩnh với Header Cache cực mạnh (Tránh quá tải băng thông & RAM)
+// 5. Phục vụ file tĩnh với Cache-Control 30 ngày (SWF, WASM, JS, CSS, ảnh)
 app.use(express.static(path.join(__dirname, '.'), {
     dotfiles: 'ignore',
     index: ['index.html'],
     maxAge: '30d',
     setHeaders: (res, filePath) => {
-        // Tệp HTML: Không cache dài để người dùng luôn nhận bản cập nhật mới nhất
+        // Tệp HTML: Cập nhật nhanh để người dùng luôn nhận bản mới nhất
         if (filePath.endsWith('.html')) {
             res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
         }
@@ -180,9 +191,8 @@ app.use(express.static(path.join(__dirname, '.'), {
     }
 }));
 
-// Điều hướng tất cả request còn lại về index.html
+// Điều hướng tất cả request về index.html
 app.get('*', (req, res) => {
-    res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
@@ -192,7 +202,33 @@ app.use((err, req, res, next) => {
     res.status(500).send('Internal Server Error');
 });
 
-server.listen(PORT, () => {
-    console.log(`Server Bleach vs Naruto Online (HTTP + WebSocket) đang chạy trên cổng: ${PORT}`);
+// 6. Bảo vệ tiến trình không bao giờ crash bất ngờ
+process.on('uncaughtException', (err) => {
+    console.error('[CRITICAL] Uncaught Exception:', err);
 });
 
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('[CRITICAL] Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
+// 7. Graceful shutdown khi Render hoặc Fly.io deploy bản mới
+function gracefulShutdown(signal) {
+    console.log(`[Server] Nhận tín hiệu ${signal}. Đang đóng các kết nối an toàn...`);
+    clearInterval(cleanupInterval);
+    wss.clients.forEach((ws) => {
+        try {
+            ws.close(1001, 'Máy chủ đang cập nhật khởi động lại');
+        } catch (e) {}
+    });
+    server.close(() => {
+        console.log('[Server] Máy chủ đã tắt hoàn tất.');
+        process.exit(0);
+    });
+    setTimeout(() => process.exit(1), 5000);
+}
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
+server.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server Bleach vs Naruto Online (HTTP + WebSocket) đang chạy trên cổng: ${PORT}`);
+});

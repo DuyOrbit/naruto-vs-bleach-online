@@ -1,0 +1,7 @@
+node_modules
+.git
+.gitignore
+take_screenshots.js
+README.md
+*.log
+
